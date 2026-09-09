@@ -1,0 +1,39 @@
+.screen--achievement {
+  background: var(--tecsup-black);
+  text-align: center;
+}
+
+.screen--achievement .achievement-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+}
+
+.screen--achievement .achievement-title {
+  font-size: 32px;
+  color: var(--text-green);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+}
+
+.screen--achievement .achievement-description {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 48px;
+}
+
+.screen--achievement .achievement-btn {
+  margin-top: 24px;
+}
+
+.screen--achievement-loading {
+  background: var(--tecsup-black);
+}
+
+.screen--achievement-loading .loading-text {
+  color: var(--text-green);
+}

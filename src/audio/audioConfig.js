@@ -1,0 +1,26 @@
+export const audioConfig = {
+  sfx: {
+    click: { src: 'assets/audio/click.mp3', volume: 0.5 },
+    hover: { src: 'assets/audio/hover.mp3', volume: 0.3 },
+    transition: { src: 'assets/audio/transition.mp3', volume: 0.4 },
+    loading: { src: 'assets/audio/loading.mp3', volume: 0.3 },
+    error: { src: 'assets/audio/error.mp3', volume: 0.5 },
+    success: { src: 'assets/audio/success.mp3', volume: 0.5 },
+    glitch: { src: 'assets/audio/glitch.mp3', volume: 0.6 },
+    alert: { src: 'assets/audio/alert.mp3', volume: 0.5 },
+    interaction: { src: 'assets/audio/interaction.mp3', volume: 0.4 },
+    typing: { src: 'assets/audio/typing.mp3', volume: 0.35 },
+    popup: { src: 'assets/audio/popup.mp3', volume: 0.4 },
+    warning: { src: 'assets/audio/warning.mp3', volume: 0.4 },
+    delete: { src: 'assets/audio/delete.mp3', volume: 0.5 },
+    tick: { src: 'assets/audio/tick.mp3', volume: 0.3 },
+  },
+  music: {
+    intro: { src: 'assets/audio/music-intro.mp3', volume: 0.3, loop: true },
+    phase1: { src: 'assets/audio/music-phase1.mp3', volume: 0.3, loop: true },
+    phase2: { src: 'assets/audio/music-phase2.mp3', volume: 0.3, loop: true },
+    phase3: { src: 'assets/audio/music-phase3.mp3', volume: 0.3, loop: true },
+    defeat: { src: 'assets/audio/music-defeat.mp3', volume: 0.3, loop: true },
+    achievement: { src: 'assets/audio/music-achievement.mp3', volume: 0.3, loop: true },
+  },
+};

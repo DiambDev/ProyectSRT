@@ -1,0 +1,296 @@
+.screen--defeat {
+  background: var(--system-black);
+  text-align: center;
+}
+
+.screen--defeat .defeat-icon {
+  font-size: 48px;
+  color: var(--alert-red);
+  margin-bottom: 16px;
+}
+
+.screen--defeat .defeat-title {
+  font-size: 24px;
+  color: var(--alert-red);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+.screen--defeat .defeat-message {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  line-height: 1.7;
+  max-width: 460px;
+}
+
+.screen--defeat .defeat-retry-btn {
+  margin-top: 16px;
+}
+
+/* ---------- Defeat loading ---------- */
+
+.screen--defeat-loading {
+  background: #000;
+}
+
+.defeat-loading-stage {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.defeat-pixel-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.laugh-words {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.laugh-word {
+  position: absolute;
+  font-family: var(--font-mono);
+  color: var(--text-white);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  animation: wordFlicker 0.35s ease;
+}
+
+.laugh-word.on {
+  opacity: 1;
+}
+
+.screen--defeat-loading .loading-bar::after {
+  background: var(--alert-red);
+}
+
+.screen--defeat-loading .loading-text {
+  color: var(--alert-red);
+}
+
+/* ============================================================
+   FASE 1 :: DERROTA (scoped, no afecta Fase 2/3)
+   ============================================================ */
+
+.screen--defeat-loading.screen--defeat-p1-loading {
+  background: #000;
+  overflow: hidden;
+}
+
+.screen--defeat.screen--defeat-p1 {
+  background: #070202;
+  overflow: hidden;
+}
+
+/* --- Carga de derrota --- */
+
+.p1dl {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.p1dl-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --threat: #00ff41;
+  transition: background 0.5s ease;
+  z-index: 1;
+}
+
+.p1dl-stage.lvl-1 {
+  background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(240, 192, 64, 0.18));
+}
+
+.p1dl-stage.lvl-2 {
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(255, 130, 48, 0.3));
+}
+
+.p1dl-stage.lvl-3 {
+  background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(255, 32, 32, 0.42));
+}
+
+.p1dl-core {
+  font-size: clamp(40px, 7vw, 88px);
+  font-weight: bold;
+  color: var(--threat);
+  text-transform: uppercase;
+  letter-spacing: 10px;
+  text-shadow: 0 0 34px var(--threat);
+  animation: pulse 0.8s ease infinite;
+}
+
+.p1dl-frag {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 44px 20px 20px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(200, 90, 90, 0.5);
+  line-height: 1.8;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.p1dl-frag-line {
+  white-space: nowrap;
+}
+
+.p1dl-frag-line.dim {
+  color: rgba(200, 90, 90, 0.25);
+}
+
+.p1dl-words {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.p1dl-word {
+  position: absolute;
+  font-family: var(--font-mono);
+  color: rgba(255, 120, 120, 0.9);
+  opacity: 0;
+  letter-spacing: 1px;
+}
+
+.p1dl-word.on {
+  opacity: 0.65;
+}
+
+.p1dl-word.typed {
+  color: var(--alert-red);
+  text-shadow: 0 0 10px rgba(255, 32, 32, 0.5);
+}
+
+.p1dl-word.flicker {
+  animation: wordFlicker 0.45s ease infinite;
+}
+
+/* --- Grieta de cristal (carga de derrota) --- */
+
+.p1dl-crack {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.p1dl-ray-wrap {
+  position: absolute;
+  transform-origin: left center;
+}
+
+.p1dl-ray {
+  width: 2px;
+  transform-origin: top center;
+  background: linear-gradient(180deg, rgba(235, 235, 245, 0.75), rgba(235, 235, 245, 0.06));
+  box-shadow: 0 0 6px rgba(255, 60, 60, 0.4);
+  animation: ray-grow 0.5s var(--ray-delay, 0ms) both;
+}
+
+.p1dl-shard {
+  position: absolute;
+  width: 54px;
+  height: 34px;
+  background: linear-gradient(135deg, rgba(220, 220, 235, 0.2), rgba(255, 60, 60, 0.05));
+  clip-path: polygon(12% 8%, 68% 0%, 100% 55%, 55% 100%, 0% 62%, 30% 40%);
+  animation: shard-in 0.45s var(--shard-delay, 0ms) both;
+}
+
+/* --- Pantalla final de derrota --- */
+
+.p1d {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  --threat: #ff2020;
+}
+
+.p1d-logs {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.p1d .p1d-word {
+  color: rgba(255, 100, 100, 0.65);
+}
+
+.p1d-crack {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.p1d-ray-wrap {
+  position: absolute;
+  transform-origin: left center;
+}
+
+.p1d-ray {
+  width: 2px;
+  transform-origin: top center;
+  background: linear-gradient(180deg, rgba(235, 235, 245, 0.8), rgba(235, 235, 245, 0.08));
+  box-shadow: 0 0 6px rgba(255, 40, 40, 0.5);
+  animation: ray-grow 0.5s var(--ray-delay, 0ms) both;
+}
+
+.p1d-shard {
+  position: absolute;
+  width: 56px;
+  height: 36px;
+  background: linear-gradient(135deg, rgba(220, 220, 235, 0.22), rgba(255, 40, 40, 0.06));
+  clip-path: polygon(12% 8%, 68% 0%, 100% 55%, 55% 100%, 0% 62%, 30% 40%);
+  animation: shard-in 0.45s var(--shard-delay, 0ms) both;
+}
+
+.screen--defeat-p1 .p1d-body {
+  position: relative;
+  z-index: 3;
+  width: min(760px, 90vw);
+  margin: 0 auto;
+  padding: 44px 46px;
+  background: rgba(8, 2, 2, 0.92);
+  border: 1px solid rgba(255, 32, 32, 0.5);
+  box-shadow: 0 0 40px rgba(255, 32, 32, 0.25);
+  opacity: 0;
+  animation: fadeIn 0.7s ease 0.2s forwards;
+}
+
+.screen--defeat-p1 .defeat-message {
+  max-width: 620px;
+  font-size: 14px;
+  color: var(--text-white);
+  line-height: 1.75;
+}
+
+.screen--defeat-p1 .defeat-title {
+  font-size: clamp(26px, 3.4vw, 40px);
+  letter-spacing: 5px;
+  text-shadow: 0 0 18px rgba(255, 32, 32, 0.5);
+}
+
+@media (max-width: 760px) {
+  .screen--defeat-p1 .p1d-body {
+    padding: 26px 20px;
+  }
+}

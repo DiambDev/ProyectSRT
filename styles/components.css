@@ -1,0 +1,217 @@
+.btn {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 10px 24px;
+  border: 1px solid var(--system-border);
+  background: transparent;
+  color: var(--text-green);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  outline: none;
+  position: relative;
+}
+
+.btn:hover {
+  background: rgba(0, 255, 65, 0.1);
+  border-color: var(--text-green);
+  box-shadow: var(--glow-intensity);
+}
+
+.btn:active {
+  background: rgba(0, 255, 65, 0.2);
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn:disabled:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.btn--alert {
+  color: var(--alert-red);
+  border-color: var(--alert-red);
+}
+
+.btn--alert:hover {
+  background: rgba(255, 32, 32, 0.1);
+  border-color: var(--alert-red);
+  box-shadow: 0 0 10px rgba(255, 32, 32, 0.3);
+}
+
+.btn--primary {
+  color: var(--text-white);
+  border-color: var(--text-green);
+  background: rgba(0, 255, 65, 0.08);
+}
+
+.btn--primary:hover {
+  background: rgba(0, 255, 65, 0.18);
+}
+
+.btn--small {
+  font-size: 12px;
+  padding: 6px 12px;
+  letter-spacing: 0.5px;
+}
+
+.loading-indicator {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-green);
+  letter-spacing: 2px;
+}
+
+.loading-indicator::after {
+  content: '...';
+  animation: blink 1s steps(1) infinite;
+}
+
+.loading-bar {
+  width: 300px;
+  height: 2px;
+  background: var(--text-muted);
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  background: var(--text-green);
+  animation: loading-slide 1.5s ease infinite;
+}
+
+@keyframes loading-slide {
+  0% { left: -50%; }
+  100% { left: 100%; }
+}
+
+.loading-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 16px;
+  letter-spacing: 2px;
+}
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+.popup {
+  background: var(--system-dark);
+  border: 1px solid var(--system-border);
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.popup-title {
+  font-size: 20px;
+  color: var(--text-green);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+
+.popup-message {
+  font-size: 14px;
+  color: var(--text-white);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.screen-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.text-green { color: var(--text-green); }
+.text-red { color: var(--alert-red); }
+.text-yellow { color: var(--alert-yellow); }
+.text-dim { color: var(--text-dim); }
+
+.scanline-overlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.05) 2px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+.volume-control {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 50;
+}
+
+.volume-control .volume-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: 34px;
+}
+
+.volume-control .volume-bar {
+  width: 72px;
+  height: 6px;
+  background: #141414;
+  border: 1px solid var(--system-border);
+  position: relative;
+}
+
+.volume-control .volume-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  background: var(--text-green);
+  box-shadow: var(--glow-intensity);
+  transition: width 0.15s ease;
+}
+
+.volume-control .volume-pct {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 46px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.volume-control .volume-btn.active {
+  background: rgba(255, 32, 32, 0.15);
+  border-color: var(--alert-red);
+  color: var(--alert-red);
+}

@@ -1,0 +1,216 @@
+.screen--intro {
+  background: var(--system-black);
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+/* ---------- Fondo con paneles diagonales ---------- */
+
+.intro-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.intro-diag {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  padding: 16px;
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+.intro-diag--left {
+  left: 0;
+  border-right: 1px solid rgba(0, 255, 65, 0.12);
+  transform: skewX(-8deg) translateX(-22px);
+  background: linear-gradient(180deg, rgba(0, 255, 65, 0.03), transparent 60%);
+}
+
+.intro-diag--left .intro-diag-line {
+  transform: skewX(8deg);
+}
+
+.intro-diag--right {
+  right: 0;
+  border-left: 1px solid rgba(0, 255, 65, 0.12);
+  transform: skewX(8deg) translateX(22px);
+  background: linear-gradient(180deg, rgba(0, 255, 65, 0.03), transparent 60%);
+}
+
+.intro-diag--right .intro-diag-line {
+  transform: skewX(-8deg);
+}
+
+.intro-diag-line {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  line-height: 1.8;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  white-space: nowrap;
+}
+
+.intro-diag-line.on {
+  opacity: 0.65;
+}
+
+/* ---------- Barra superior ---------- */
+
+.intro-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.18);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  z-index: 3;
+}
+
+.intro-topbar-clock {
+  color: var(--text-green);
+}
+
+/* ---------- Panel de alerta (derecha) ---------- */
+
+.intro-alert {
+  position: relative;
+  margin-top: 16vh;
+  margin-right: 7vw;
+  margin-left: auto;
+  width: min(540px, 46vw);
+  border: 1px solid rgba(240, 192, 64, 0.45);
+  background: linear-gradient(160deg, rgba(240, 192, 64, 0.06), rgba(255, 255, 255, 0.01) 55%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(240, 192, 64, 0.12);
+  padding: 30px 34px 26px;
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+  z-index: 2;
+}
+
+.intro-alert-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+  text-transform: uppercase;
+}
+
+.intro-alert-tag {
+  color: var(--alert-yellow);
+  border: 1px solid rgba(240, 192, 64, 0.5);
+  padding: 4px 9px;
+}
+
+.intro-alert-code {
+  color: var(--text-dim);
+}
+
+.intro-alert-title {
+  font-size: clamp(30px, 3.4vw, 46px);
+  color: var(--alert-red);
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  text-shadow: 0 0 22px rgba(255, 32, 32, 0.45);
+  opacity: 0;
+}
+
+.intro-alert-title.reveal-in {
+  animation: alert-title-in 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.intro-alert-msg {
+  font-size: 15px;
+  color: var(--text-white);
+  line-height: 1.75;
+  min-height: 84px;
+  font-family: var(--font-mono);
+  margin-bottom: 18px;
+}
+
+.intro-alert-msg.typewriter.typing::after,
+.p1-desc.typewriter.typing::after,
+.defeat-message.typewriter.typing::after {
+  content: '_';
+  color: var(--text-green);
+  animation: blink 0.8s step-end infinite;
+}
+
+.intro-alert-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+  margin-bottom: 18px;
+}
+
+.intro-alert-meta b {
+  color: var(--alert-red);
+}
+
+.intro-alert .btn--start {
+  margin-top: auto;
+  width: 100%;
+  font-size: 15px;
+  padding: 13px;
+}
+
+/* ---------- Pie de TECSUP ---------- */
+
+.intro-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-green);
+  border-top: 1px solid rgba(0, 255, 65, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 3;
+}
+
+@media (max-width: 900px) {
+  .intro-diag {
+    width: 20%;
+  }
+  .intro-alert {
+    width: min(520px, 78vw);
+    margin-right: 6vw;
+  }
+}
+
+@media (max-width: 640px) {
+  .intro-alert {
+    width: 100%;
+    margin: 12vh 12px 0;
+    min-height: 0;
+    padding: 22px;
+  }
+}

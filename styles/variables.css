@@ -1,0 +1,24 @@
+:root {
+  --tecsup-black: #231F20;
+
+  --system-black: #0a0a0a;
+  --system-dark: #111111;
+  --system-border: #1a3a1a;
+  --system-glow: #00ff41;
+
+  --alert-yellow: #f0c040;
+  --alert-red: #ff2020;
+  --alert-orange: #ff6600;
+
+  --text-white: #e0e0e0;
+  --text-dim: #666666;
+  --text-muted: #333333;
+  --text-green: #00ff41;
+
+  --font-mono: 'Courier New', Courier, monospace;
+  --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  --screen-transition-duration: 400ms;
+  --glow-intensity: 0 0 10px rgba(0, 255, 65, 0.3);
+  --glow-intensity-strong: 0 0 20px rgba(0, 255, 65, 0.5);
+}

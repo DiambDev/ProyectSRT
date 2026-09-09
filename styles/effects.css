@@ -1,0 +1,58 @@
+.vfx-glitch {
+  animation: glitch-effect 0.1s steps(2) infinite;
+}
+
+@keyframes glitch-effect {
+  0% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px); }
+  20% { clip-path: inset(92% 0 1% 0); transform: translate(1px, -1px); }
+  40% { clip-path: inset(43% 0 1% 0); transform: translate(-1px, 3px); }
+  60% { clip-path: inset(25% 0 58% 0); transform: translate(3px, 1px); }
+  80% { clip-path: inset(54% 0 7% 0); transform: translate(-3px, -2px); }
+  100% { clip-path: inset(58% 0 43% 0); transform: translate(2px, -3px); }
+}
+
+.vfx-scanlines {
+  position: relative;
+}
+
+.vfx-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+.vfx-red-flash {
+  animation: red-flash 0.3s ease;
+}
+
+@keyframes red-flash {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: inset 0 0 100px rgba(255, 32, 32, 0.4); }
+}
+
+.vfx-crt-flicker {
+  animation: crt-flicker 0.05s infinite alternate;
+}
+
+@keyframes crt-flicker {
+  from { filter: brightness(1); }
+  to { filter: brightness(0.98); }
+}
+
+.vfx-error-shake {
+  animation: error-shake 0.4s ease;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
