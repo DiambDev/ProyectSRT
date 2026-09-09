@@ -14,7 +14,7 @@ export function renderActivity2(screen) {
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
   titlebar.innerHTML =
-    '<span>ACTIVIDAD 2 DE 3 · ARCHIVOS MODIFICADOS</span>' +
+    '<span>ACTIVIDAD 2 DE 3 \u00b7 ARCHIVOS MODIFICADOS</span>' +
     '<div class="p3-dots"><span></span><span></span><span></span></div>';
   windowEl.appendChild(titlebar);
 
@@ -22,7 +22,7 @@ export function renderActivity2(screen) {
   toolbar.className = 'p3-exp-toolbar';
   const tag = document.createElement('span');
   tag.className = 'p3-exp-tag';
-  tag.textContent = 'Ábre los archivos y verifica su contenido antes de eliminar los que parezcan alterados.';
+  tag.textContent = '\u00c1bre los archivos y verifica su contenido antes de eliminar los que parezcan alterados.';
   const counts = document.createElement('span');
   counts.className = 'p3-exp-counts';
   counts.dataset.counts = 'a2';
@@ -38,7 +38,7 @@ export function renderActivity2(screen) {
   const grp = (label, count) => {
     const n = document.createElement('div');
     n.className = 'p3-nav-item';
-    n.innerHTML = `<span class="p3-nav-arrow">▸</span><span>${label}</span><span class="p3-nav-count">${count}</span>`;
+    n.innerHTML = `<span class="p3-nav-arrow">\u25B8</span><span>${label}</span><span class="p3-nav-count">${count}</span>`;
     return n;
   };
   nav.appendChild(grp('Documentos recuperados', PHASE3.activity2.total));
@@ -127,7 +127,7 @@ function fileRow(screen, f) {
   const name = document.createElement('span');
   name.className = 'p3-file-name' + (f.isVerified ? ' verified' : '');
   name.textContent = f.name;
-  if (f.isVerified) name.setAttribute('data-verified', '✓');
+  if (f.isVerified) name.setAttribute('data-verified', '\u2713');
   row.appendChild(name);
 
   const type = document.createElement('span');
@@ -138,11 +138,11 @@ function fileRow(screen, f) {
   const status = document.createElement('span');
   status.className = 'p3-file-status';
   if (f.isDeleted) {
-    status.textContent = '× ELIMINADO';
-    status.className += ' is-danger';
+    status.textContent = '\u00D7 ELIMINADO';
+    status.classList.add('is-danger');
   } else {
-    status.textContent = '✓ RECUPERADO';
-    status.className += ' is-ok';
+    status.textContent = '\u2713 RECUPERADO';
+    status.classList.add('is-ok');
   }
   row.appendChild(status);
 
@@ -183,7 +183,7 @@ function openFile(screen, f) {
   pre.textContent = f.content;
   const hint = document.createElement('p');
   hint.className = 'p3-file-popup-hint';
-  hint.textContent = 'Verifica el contenido antes de tomar una decisión.';
+  hint.textContent = 'Verifica el contenido antes de tomar una decisi\u00f3n.';
   content.appendChild(meta);
   content.appendChild(pre);
   content.appendChild(hint);
@@ -202,7 +202,8 @@ function handleDelete(screen) {
   if (!selected.length) {
     AudioManager.playSFX(AUDIO_SFX.INTERACTION);
     screen._a2FeedbackEl.textContent = 'SELECCIONA ARCHIVOS PARA BORRAR';
-    screen._a2FeedbackEl.className = 'p3-exp-feedback text-yellow';
+    screen._a2FeedbackEl.className = 'p3-exp-feedback';
+    screen._a2FeedbackEl.style.color = 'var(--alert-yellow)';
     return;
   }
 
@@ -238,8 +239,9 @@ function handleDelete(screen) {
   if (anyWrong) AudioManager.playSFX(AUDIO_SFX.ERROR);
 
   screen._a2FeedbackEl.textContent =
-    `Se eliminaron ${selected.length} archivo(s). Puntaje de la actividad: ${formatScore(score)} / 10`;
-  screen._a2FeedbackEl.className = 'p3-exp-feedback ' + (anyWrong ? 'text-red' : 'text-green');
+    `ARCHIVOS ENCONTRADOS: ${correct} / ${PHASE3.activity2.targetFiles} \u00b7 PUNTAJE: ${formatScore(score)} / ${PHASE3.activity2.maxScore}`;
+  screen._a2FeedbackEl.className = 'p3-exp-feedback';
+  screen._a2FeedbackEl.style.color = anyWrong ? 'var(--alert-red)' : 'var(--p3-blue)';
 
   renderFileList(screen);
   updateA2Summary(screen);
@@ -249,28 +251,30 @@ function updateA2Summary(screen) {
   const st = State.get('phase3State');
   const reviewed = st.files.filter((f) => f.isVerified).length;
   const deleted = st.files.filter((f) => f.isDeleted).length;
+  const correctFound = st.files.filter((f) => f.isDeleted && f.isCorrupted).length;
 
   screen._a2CountsEl.textContent =
-    `Mostrando ${st.files.length} archivos · Revisados: ${reviewed} · Eliminados: ${deleted}`;
+    `Mostrando ${st.files.length} archivos \u00b7 Revisados: ${reviewed} \u00b7 Eliminados: ${deleted}`;
 
   const aside = screen._a2AsideEl;
   aside.innerHTML = '';
   const h = document.createElement('h4');
   h.className = 'p3-check-title';
-  h.textContent = 'CHECKLIST DE VERIFICACIÓN';
+  h.textContent = 'CHECKLIST DE VERIFICACI\u00d3N';
   aside.appendChild(h);
 
   const rows = [
     { label: 'Archivos revisados', value: `${reviewed} / ${st.files.length}` },
+    { label: 'Archivos corruptos encontrados', value: `${correctFound} / ${PHASE3.activity2.targetFiles}` },
     { label: 'Comprobar coherencia del contenido', value: 'criterio' },
-    { label: 'Reportar solo archivos con anomalías', value: 'criterio' },
+    { label: 'Reportar solo archivos con anomal\u00edas', value: 'criterio' },
   ];
   rows.forEach((r) => {
     const li = document.createElement('div');
     li.className = 'p3-check-item';
     const mark = document.createElement('span');
     mark.className = 'p3-check-mark';
-    mark.textContent = '✓';
+    mark.textContent = '\u2713';
     const lab = document.createElement('span');
     lab.className = 'p3-check-label';
     lab.textContent = r.label;
@@ -291,14 +295,14 @@ function handleFinish(screen) {
   const content = document.createElement('div');
   content.className = 'p3-summary-popup';
   const lines = [
-    ['VERIFICACIÓN FINALIZADA', 'heading'],
+    ['VERIFICACI\u00d3N FINALIZADA', 'heading'],
     ['Archivos eliminados', String(st.files.filter((f) => f.isDeleted).length)],
     ['Archivos correctamente identificados', String(st.correctDeletions)],
     ['Archivos eliminados incorrectamente', String(st.incorrectDeletions)],
-    ['Puntaje de la actividad', `${formatScore(st.activity2Score)} / 10`],
+    ['Puntaje de la actividad', `${formatScore(st.activity2Score)} / ${PHASE3.activity2.maxScore}`],
   ];
   lines.forEach(([label, value]) => {
-    if (label === 'VERIFICACIÓN FINALIZADA') {
+    if (label === 'VERIFICACI\u00d3N FINALIZADA') {
       const h = document.createElement('h3');
       h.className = 'p3-summary-heading';
       h.textContent = label;

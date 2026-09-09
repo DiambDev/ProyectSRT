@@ -49,9 +49,11 @@ export const phase1LoadingScreen = {
     this.detailEl = this.container.querySelector('[data-detail]');
     this.logEl = this.container.querySelector('[data-log]');
     this.blockFills = [];
+    this.blockBars = [];
     for (let i = 0; i < 3; i++) {
       const bar = this.container.querySelector('[data-block-bar="' + i + '"]');
       this.blockFills.push(bar ? bar.querySelector('i') : null);
+      this.blockBars.push(bar);
     }
 
     this.fillEl.style.width = '0%';
@@ -64,6 +66,8 @@ export const phase1LoadingScreen = {
     let detailIdx = 0;
     let logIdx = 0;
     let ticks = 0;
+    let block3Failed = false;
+    let block3FailProgress = 0;
     this._progressInterval = setInterval(() => {
       if (!this._alive) {
         clearInterval(this._progressInterval);
@@ -73,30 +77,55 @@ export const phase1LoadingScreen = {
       progress = Math.min(100, progress + 1 + Math.floor(Math.random() * 3));
       this.fillEl.style.width = progress + '%';
       this.percentEl.textContent = progress + '%';
-      this.blockFills.forEach((f) => {
-        if (f) f.style.width = progress + '%';
+
+      this.blockFills.forEach((f, idx) => {
+        if (!f) return;
+        if (idx === 2) {
+          if (!block3Failed) {
+            if (progress <= 60) {
+              f.style.width = progress + '%';
+              block3FailProgress = progress;
+            } else if (!block3Failed) {
+              block3Failed = true;
+              f.style.width = block3FailProgress + '%';
+              f.style.background = 'var(--alert-red)';
+              f.style.boxShadow = '0 0 10px rgba(255, 32, 32, 0.6)';
+              const bar = this.blockBars[2];
+              if (bar) {
+                bar.style.borderColor = 'rgba(255, 32, 32, 0.6)';
+                bar.style.background = 'rgba(255, 32, 32, 0.08)';
+              }
+              const label = this.container.querySelectorAll('.p1l-block-label');
+              if (label[2]) {
+                label[2].style.color = 'var(--alert-red)';
+                label[2].textContent = 'BLOQUE 03 \u2014 FALLO';
+              }
+              AudioManager.playSFX(AUDIO_SFX.ERROR);
+              this._pushLog('BLOQUE 03: error de integridad \u2014 FALLO CR\u00cdTICO');
+              this.detailEl.textContent = 'FALLO DETECTADO EN BLOQUE 03 \u2014 COMPONENTE CR\u00cdTICO';
+              this.detailEl.style.color = 'var(--alert-red)';
+            }
+          }
+        } else {
+          f.style.width = progress + '%';
+        }
       });
 
       if (ticks % 5 === 0) AudioManager.playSFX(AUDIO_SFX.INTERACTION);
 
-      if (progress >= 25 && detailIdx < 1) {
+      if (progress >= 25 && detailIdx < 1 && !block3Failed) {
         detailIdx = 1;
         this.detailEl.textContent = DETAILS[detailIdx];
         this._pushLog(LOG_NOTE[0]);
         AudioManager.playSFX(AUDIO_SFX.TICK);
       }
-      if (progress >= 50 && detailIdx < 2) {
+      if (progress >= 50 && detailIdx < 2 && !block3Failed) {
         detailIdx = 2;
         this.detailEl.textContent = DETAILS[detailIdx];
         this._pushLog(LOG_NOTE[1]);
         AudioManager.playSFX(AUDIO_SFX.TICK);
       }
-      if (progress >= 75 && detailIdx < 3) {
-        detailIdx = 3;
-        this.detailEl.textContent = DETAILS[detailIdx];
-        this._pushLog(LOG_NOTE[2]);
-        AudioManager.playSFX(AUDIO_SFX.TICK);
-      }
+
       if (ticks % 12 === 0 && logIdx < LOG_NOTE.length) {
         this._pushLog(LOG_NOTE[Math.min(logIdx, LOG_NOTE.length - 1)]);
         logIdx++;

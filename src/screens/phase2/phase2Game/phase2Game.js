@@ -6,7 +6,7 @@ import { AnimationManager } from '../../../animation/animationManager.js';
 import { VFXManager } from '../../../vfx/vfxManager.js';
 import { UIManager } from '../../../ui/uiManager.js';
 import { createButton } from '../../../ui/components/index.js';
-import { resolveChoice } from './phase2Validator.js';
+import { findContact, matchResponse } from './phase2Validator.js';
 import {
   PHASE2_CONTACTS,
   PHASE2_TERMINAL_INITIAL,
@@ -28,20 +28,25 @@ export const phase2GameScreen = {
     container.innerHTML = `
       <div class="p2-layout">
         <aside class="p2-panel p2-contacts">
-          <div class="p2-panel-head">CONTACTOS</div>
+          <div class="p2-panel-head">CONTACTOS <span class="p2-head-stat" data-csum></span></div>
           <div class="p2-contacts-list" data-contacts></div>
+          <div class="p2-net-foot" data-netfoot></div>
         </aside>
         <main class="p2-panel p2-chat">
           <div class="p2-chat-head">
             <span class="p2-chat-contact" data-cname>—</span>
             <span class="p2-chat-status" data-cstatus>EN LÍNEA</span>
           </div>
+          <div class="p2-chat-meta" data-cmeta></div>
           <div class="p2-chat-messages" data-messages></div>
-          <div class="p2-options" data-options></div>
+          <div class="p2-input-bar">
+            <input class="p2-input" data-input type="text" placeholder="Escribe tu respuesta..." autocomplete="off" />
+          </div>
         </main>
         <aside class="p2-panel p2-terminal">
           <div class="p2-panel-head">SISTEMA DE VERIFICACIÓN</div>
           <div class="p2-term-body" data-term></div>
+          <div class="p2-refopts" data-refopts></div>
         </aside>
       </div>
     `;
@@ -49,10 +54,21 @@ export const phase2GameScreen = {
       contacts: container.querySelector('[data-contacts]'),
       cname: container.querySelector('[data-cname]'),
       cstatus: container.querySelector('[data-cstatus]'),
+      cmeta: container.querySelector('[data-cmeta]'),
       messages: container.querySelector('[data-messages]'),
-      options: container.querySelector('[data-options]'),
+      input: container.querySelector('[data-input]'),
+      inputBar: container.querySelector('.p2-input-bar'),
       terminal: container.querySelector('[data-term]'),
+      refopts: container.querySelector('[data-refopts]'),
+      csum: container.querySelector('[data-csum]'),
+      netfoot: container.querySelector('[data-netfoot]'),
     };
+    this._els.send = createButton({
+      text: 'ENVIAR',
+      classes: ['p2-send'],
+      onClick: () => this._sendMessage(),
+    });
+    this._els.inputBar.appendChild(this._els.send);
   },
 
   async enter() {
@@ -67,8 +83,9 @@ export const phase2GameScreen = {
     this._phase2Done = false;
 
     this._els.messages.innerHTML = '';
-    this._els.options.innerHTML = '';
+    this._els.refopts.innerHTML = '';
     this._els.contacts.innerHTML = '';
+    this._els.cmeta.textContent = '';
     if (this.container.classList.contains('restored')) this.container.classList.remove('restored');
     if (this.container.classList.contains('stable')) this.container.classList.remove('stable');
 
@@ -79,7 +96,9 @@ export const phase2GameScreen = {
 
     this._appendSystem('ANÁLISIS DE CANAL INICIADO · REVISE SUS CONTACTOS Y EL SISTEMA DE VERIFICACIÓN');
     this._buildContactsList();
+    this._buildNetFoot();
     this._selectContact(PHASE2_CONTACTS[0].id, { fresh: true });
+    this._saveState();
   },
 
   async exit() {
@@ -92,6 +111,7 @@ export const phase2GameScreen = {
   _buildContactsList() {
     this._revealed = [0];
     this._buildContactItem(PHASE2_CONTACTS[0]);
+    this._els.csum.textContent = `${PHASE2_CONTACTS.length} ESCENARIOS`;
   },
 
   _buildContactItem(contact) {
@@ -112,7 +132,11 @@ export const phase2GameScreen = {
 
     const sub = document.createElement('span');
     sub.className = 'p2-contact-sub';
-    sub.textContent = contact.type === 'attacker' ? 'NO VERIFICADO' : 'CANAL VERIFICABLE';
+    sub.textContent = contact.tag;
+
+    const micro = document.createElement('span');
+    micro.className = 'p2-contact-micro';
+    micro.innerHTML = `<i class="p2-dot"></i> CANAL ${contact.channelId} · ACTIVIDAD RECIENTE`;
 
     const badge = document.createElement('span');
     badge.className = 'p2-badge';
@@ -120,6 +144,7 @@ export const phase2GameScreen = {
 
     meta.appendChild(name);
     meta.appendChild(sub);
+    meta.appendChild(micro);
     item.appendChild(avatar);
     item.appendChild(meta);
     item.appendChild(badge);
@@ -129,9 +154,26 @@ export const phase2GameScreen = {
     this._contactEls[contact.id] = { item, badge };
   },
 
+  _buildNetFoot() {
+    const lines = [
+      'SESION: TSC-2026-0x41',
+      'CANAL: RESTAURADO · PUERTO 443',
+      'LATENCIA MEDIA: 23ms',
+      'CRIPTO: AES-256 · TLS 1.3',
+      'HOST REMOTO: id.tecsup.edu.pe',
+      'ADVERTENCIAS: 0 · ERRORES: 0',
+    ];
+    lines.forEach((t) => {
+      const line = document.createElement('div');
+      line.className = 'p2-net-line';
+      line.textContent = t;
+      this._els.netfoot.appendChild(line);
+    });
+  },
+
   _selectContact(id, opts = {}) {
     if (this._busy) return;
-    const contact = PHASE2_CONTACTS.find((c) => c.id === id) || null;
+    const contact = findContact(id);
     if (!contact) return;
 
     this._activeContactId = id;
@@ -144,43 +186,33 @@ export const phase2GameScreen = {
 
     this._els.cname.textContent = contact.name;
     this._els.cstatus.textContent = 'EN LÍNEA';
+    this._els.cmeta.textContent = contact.tag + ' · ' + contact.channelId;
     this._els.messages.innerHTML = '';
-    this._els.options.innerHTML = '';
 
-    const convo = this._convo[id] || (this._convo[id] = { turnId: null, msgs: [], done: false });
+    const convo = this._convo[id] || (this._convo[id] = { started: false, msgs: [], done: false });
     convo.msgs.forEach((m) => this._appendMessage(m.text, m.from, { instant: true }));
 
     AudioManager.playSFX(AUDIO_SFX.INTERACTION);
+    this._refopts(contact);
+    this._setInputEnabled(true);
 
-    if (opts.fresh && !convo.done) {
-      if (convo.msgs.length <= 1) {
-        this._appendSystem(`◉ CONTACTO NUEVO · MENSAJE DE ${contact.name}`);
-      }
-      if (!convo.turnId) {
-        convo.turnId = Object.keys(contact.turns)[0];
-        this._playTurn(contact, convo.turnId);
-      }
-    } else if (!convo.done) {
-      const turn = contact.turns[convo.turnId];
-      if (turn && turn.options) this._renderOptions(contact, convo.turnId);
+    if (opts.fresh && !convo.done && !convo.started) {
+      convo.started = true;
+      this._appendSystem(`◉ CONTACTO NUEVO · MENSAJE DE ${contact.name}`);
+      this._playTurn(contact);
     }
 
     this._saveState();
   },
 
-  async _playTurn(contact, turnId) {
+  async _playTurn(contact) {
     if (!this._alive) return;
     this._busy = true;
+    this._setInputEnabled(false);
     const convo = this._convo[contact.id];
     if (!convo) return;
-    convo.turnId = turnId;
-    const turn = contact.turns[turnId];
-    if (!turn) {
-      this._busy = false;
-      return;
-    }
 
-    for (const text of turn.messages) {
+    for (const text of contact.messages) {
       if (!this._alive) return;
       await this._showTyping(650);
       if (!this._alive) return;
@@ -189,92 +221,128 @@ export const phase2GameScreen = {
     }
 
     if (!this._alive) return;
-    if (turn.options) {
-      this._renderOptions(contact, turnId);
-    } else {
-      this._completeContact(contact);
-    }
     this._busy = false;
+    this._setInputEnabled(true);
     this._saveState();
   },
 
-  _renderOptions(contact, turnId) {
-    const turn = contact.turns[turnId];
-    if (!turn || !turn.options) return;
-    this._els.options.innerHTML = '';
-    this._optionBtns = [];
-    turn.options.forEach((opt) => {
-      const btn = createButton({ text: opt.label, classes: ['p2-option'] });
-      btn.dataset.choice = `${contact.id}:${turnId}:${opt.id}`;
-      btn.addEventListener('click', () => this._handleChoice(contact, turnId, opt));
-      this._els.options.appendChild(btn);
-      this._optionBtns.push(btn);
+  async _playPressure(contact) {
+    if (!this._alive) return;
+    const pressure = contact.pressure;
+    if (!pressure || !pressure.messages || !pressure.messages.length) {
+      this._refopts(contact);
+      this._setInputEnabled(true);
+      return;
+    }
+    for (const text of pressure.messages) {
+      if (!this._alive) return;
+      await this._showTyping(520);
+      if (!this._alive) return;
+      this._addMessage(text, 'them');
+      await this._sleep(240);
+    }
+    if (!this._alive) return;
+    this._refopts(contact);
+    this._setInputEnabled(true);
+    this._saveState();
+  },
+
+  _refopts(contact) {
+    if (!contact || !contact.options) return;
+    this._els.refopts.innerHTML = `
+      <div class="p2-refopts-head">RESPUESTAS VÁLIDAS · ${contact.tag}</div>
+    `;
+    const shuffled = contact.options.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const letters = ['A', 'B', 'C', 'D'];
+    shuffled.forEach((opt, idx) => {
+      const card = document.createElement('div');
+      card.className = 'p2-refopt';
+      const letter = document.createElement('span');
+      letter.className = 'p2-refopt-letter';
+      letter.textContent = letters[idx];
+      const text = document.createElement('span');
+      text.className = 'p2-refopt-text';
+      text.textContent = opt.label;
+      card.appendChild(letter);
+      card.appendChild(text);
+      this._els.refopts.appendChild(card);
     });
   },
 
-  async _handleChoice(contact, turnId, opt) {
+  _sendMessage() {
     if (this._busy || !this._alive) return;
-    const result = resolveChoice(contact, turnId, opt.id);
-    if (!result) return;
+    const text = (this._els.input.value || '').trim();
+    if (!text) return;
+    this._addMessage(text, 'user');
+    this._els.input.value = '';
+    AudioManager.playSFX(AUDIO_SFX.INTERACTION);
+    this._handleResponse(text);
+  },
+
+  async _handleResponse(text) {
+    if (this._busy || !this._alive) return;
+    const contact = findContact(this._activeContactId);
+    if (!contact) return;
+    const opt = matchResponse(contact, text);
+    if (!opt) return;
 
     this._busy = true;
+    this._setInputEnabled(false);
     this._decisions.push({
       contactId: contact.id,
-      turnId,
-      choiceId: opt.id,
+      optionId: opt.id,
+      letter: opt.letter,
       safe: !!opt.safe,
+      risk: !!opt.risk,
       critical: !!opt.critical,
     });
-
-    this._optionBtns.forEach((b) => { b.disabled = true; });
-    const clicked = this._optionBtns.find((b) => b.dataset.choice === `${contact.id}:${turnId}:${opt.id}`);
-    if (clicked) clicked.classList.add('chosen');
-
-    this._addMessage(opt.label, 'user');
+    this._termAppend(`> RESPONDE: ${opt.letter}`, '');
 
     if (opt.critical) {
       AudioManager.playSFX(AUDIO_SFX.ERROR);
       VFXManager.redFlash(350);
       this._termAppend('× DECISIÓN CRÍTICA · CANAL EXPUESTO', 'danger');
-    } else if (opt.safe) {
+      this._appendSystem('× DECISIÓN CRÍTICA · EL CANAL HA SIDO EXPUESTO');
+      this._saveState();
+      await this._sleep(650);
+      if (this._alive) this._goDefeat();
+      return;
+    }
+
+    if (opt.safe) {
       AudioManager.playSFX(AUDIO_SFX.SUCCESS);
       this._termAppend('> DECISIÓN SEGURA REGISTRADA', 'ok');
-    } else {
-      AudioManager.playSFX(AUDIO_SFX.WARNING);
-      VFXManager.glitch(this.container, 300);
-      this._termAppend('! DECISIÓN DE RIESGO · SE GENERÓ PRESIÓN', 'warn');
-    }
-
-    await this._sleep(650);
-    if (!this._alive) return;
-
-    if (result.next === 'defeat') {
-      this._goDefeat();
-      return;
-    }
-    if (result.next === 'complete') {
-      this._completeContact(contact);
+      this._appendSystem('✓ DECISIÓN SEGURA · ESCENARIO SUPERADO');
+      this._saveState();
+      await this._sleep(550);
       this._busy = false;
+      if (this._alive) this._completeContact(contact);
       return;
     }
+
+    AudioManager.playSFX(AUDIO_SFX.WARNING);
+    VFXManager.glitch(this.container, 300);
+    this._termAppend('! DECISIÓN DE RIESGO · SE GENERÓ PRESIÓN', 'warn');
+    this._appendSystem('! DECISIÓN DE RIESGO · EL SOLICITANTE AUMENTA LA PRESIÓN');
+    this._saveState();
+    await this._sleep(520);
+    if (this._alive) await this._playPressure(contact);
     this._busy = false;
-    this._playTurn(contact, result.next);
   },
 
   async _completeContact(contact) {
     const convo = this._convo[contact.id];
     if (!convo || convo.done) return;
     convo.done = true;
-    convo.turnId = Object.keys(contact.turns)[Object.keys(contact.turns).length - 1];
 
     const order = PHASE2_CONTACTS.findIndex((c) => c.id === contact.id) + 1;
-    this._appendSystem(`◉ CONTACTO ${order} SUPERADO · ANÁLISIS COMPLETADO`);
-    this._termAppend(PHASE2_TERMINAL_PROGRESS[contact.id] || `[ OK ] CONTACTO ${order} SUPERADO`, 'ok');
+    this._appendSystem(`◉ ESCENARIO ${order} SUPERADO · ANÁLISIS COMPLETADO`);
+    this._termAppend(PHASE2_TERMINAL_PROGRESS[contact.id] || `[ OK ] ESCENARIO ${order} SUPERADO`, 'ok');
     AudioManager.playSFX(AUDIO_SFX.SUCCESS);
-
-    if (contact.type === 'legit' && !this._verified.includes(contact.id)) {
-      this._verified.push(contact.id);
-    }
 
     this._saveState();
 
@@ -357,6 +425,11 @@ export const phase2GameScreen = {
     this._els.terminal.appendChild(line);
   },
 
+  _setInputEnabled(enabled) {
+    this._els.input.disabled = !enabled && this._alive;
+    this._els.send.disabled = !enabled && this._alive;
+  },
+
   _showTyping(ms) {
     const convo = this._convo[this._activeContactId];
     const box = document.createElement('div');
@@ -410,7 +483,7 @@ export const phase2GameScreen = {
     const active = this._convo[this._activeContactId] || {};
     State.set('phase2State', {
       currentContact: this._activeContactId,
-      currentTurn: active.turnId || null,
+      currentTurn: active.done ? 'ok' : active.started ? 'awaiting' : null,
       contactsCompleted: completed,
       decisions: this._decisions,
       verifiedContacts: this._verified,

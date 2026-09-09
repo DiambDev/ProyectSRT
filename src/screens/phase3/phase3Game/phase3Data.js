@@ -1,4 +1,5 @@
 export const PHASE3 = {
+  totalFiles: 75,
   recovered: 50,
   modified: 20,
   deleted: 5,
@@ -26,16 +27,17 @@ export const PHASE3 = {
   activity2: {
     title: 'ARCHIVOS MODIFICADOS',
     total: 50,
+    targetFiles: 20,
     corrupted: 20,
     normal: 30,
-    maxScore: 10,
-    perCorrect: 0.5,
+    maxScore: 14,
+    perCorrect: 1,
     perWrong: 0.5,
   },
 
   activity3: {
     title: 'ARCHIVOS ELIMINADOS',
-    points: 6,
+    points: 2,
     timerSeconds: 180,
     files: [
       'ProyectoFinalSeguridad.docx',
@@ -45,42 +47,43 @@ export const PHASE3 = {
       'ConfiguracionPC.txt',
     ],
     mandatoryFile: 'ProyectoFinalSeguridad',
-    situationHeader: 'Estos archivos fueron eliminados durante el incidente.',
-    situationText: 'Debes decidir qué método de recuperación utilizar para recuperarlos.',
+    situationHeader: 'ARCHIVOS ELIMINADOS DURANTE EL INCIDENTE',
+    situationText:
+      'El ataque comenzó hace aproximadamente 6 minutos. Se perdieron 5 archivos del sistema. Debes decidir qué método de recuperación utilizar para restaurarlos de forma segura.',
     options: [
       'Recuperar desde Drive',
       'Recuperar desde USB',
       'Utilizar la copia de seguridad de las 12:00 a. m. de anoche',
-      'Utilizar la copia de seguridad de hace 5 minutos',
+      'Restaurar desde el punto de restauración del sistema',
       'Dejar los archivos como están y darlos por perdidos',
     ],
-    correctIndex: 3,
+    correctIndex: 2,
     explanation:
-      'La copia de seguridad de hace 5 minutos es la más reciente disponible y permite recuperar la mayor cantidad de información reciente, minimizando la pérdida de trabajo.',
+      'La copia de seguridad de las 12:00 a. m. de anoche es la más reciente disponible antes del incidente y permite recuperar la mayor cantidad de información con mínima pérdida de trabajo.',
   },
 };
 
 export const SCORE_MESSAGES = [
   {
-    min: 18,
+    min: 14,
     title: '¡Excelente trabajo!',
     message:
       'Demostraste un buen criterio para analizar y recuperar información después de un incidente de seguridad.',
   },
   {
-    min: 15,
+    min: 11,
     title: '¡Muy buen trabajo!',
     message:
       'Comprendiste la mayoría de las decisiones importantes. Un poco más de atención en la verificación te permitirá mejorar.',
   },
   {
-    min: 12,
+    min: 8,
     title: '¡Buen trabajo!',
     message:
       'Lograste resolver gran parte del incidente. Revisa tus decisiones para fortalecer tus conocimientos de seguridad digital.',
   },
   {
-    min: 10,
+    min: 5,
     title: '¡Aprobaste!',
     message:
       'Conseguiste completar la simulación, pero todavía hay decisiones de seguridad que puedes mejorar.',

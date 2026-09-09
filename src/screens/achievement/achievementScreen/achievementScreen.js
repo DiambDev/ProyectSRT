@@ -22,6 +22,7 @@ export const achievementScreen = {
   _build() {
     const s = State.get('phase3State');
     const score = Number(s.finalScore || 0);
+    const passed = score >= 14;
     const msg = scoreMessageFor(score);
 
     AudioManager.playSFX(AUDIO_SFX.SUCCESS);
@@ -33,9 +34,22 @@ export const achievementScreen = {
     wrap.className = 'result-card';
     wrap.style.animation = 'scaleIn 0.5s ease forwards';
 
+    const logoEl = document.createElement('div');
+    logoEl.className = 'result-logo';
+    const img = document.createElement('img');
+    img.className = 'result-logo-img';
+    img.alt = 'TECSUP';
+    img.src = 'src/images/tecsuplogo2.png';
+    img.style.maxHeight = '120px';
+    img.style.maxWidth = '180px';
+    img.style.margin = '0 auto 20px';
+    img.style.display = 'block';
+    logoEl.appendChild(img);
+    wrap.appendChild(logoEl);
+
     const kicker = document.createElement('div');
     kicker.className = 'result-kicker';
-    kicker.textContent = 'SIMULACIÓN COMPLETADA';
+    kicker.textContent = passed ? 'DESAF\u00cdO COMPLETADO' : 'SIMULACI\u00d3N COMPLETADA';
     wrap.appendChild(kicker);
 
     const title = document.createElement('h2');
@@ -59,9 +73,9 @@ export const achievementScreen = {
     summary.className = 'result-summary';
 
     const rows = [
-      ['ACTIVIDAD 1', 'Verificación de archivos recuperados', formatScore(s.activity1Score), '/ 4'],
-      ['ACTIVIDAD 2', 'Identificación de archivos modificados', formatScore(s.activity2Score), '/ 10'],
-      ['ACTIVIDAD 3', 'Recuperación de archivos eliminados', formatScore(s.activity3Score), '/ 6'],
+      ['ACTIVIDAD 1', 'Verificaci\u00f3n de archivos recuperados', formatScore(s.activity1Score), `/ ${PHASE3.activity1.points}`],
+      ['ACTIVIDAD 2', 'Identificaci\u00f3n de archivos modificados', formatScore(s.activity2Score), `/ ${PHASE3.activity2.maxScore}`],
+      ['ACTIVIDAD 3', 'Recuperaci\u00f3n de archivos eliminados', formatScore(s.activity3Score), `/ ${PHASE3.activity3.points}`],
     ];
     rows.forEach(([label, sub, val, total]) => {
       const row = document.createElement('div');
@@ -84,14 +98,14 @@ export const achievementScreen = {
 
     const totalRow = document.createElement('div');
     totalRow.className = 'result-row result-total';
-    const l = document.createElement('div');
-    l.className = 'result-row-label';
-    l.innerHTML = '<strong>TOTAL</strong>';
-    const v = document.createElement('div');
-    v.className = 'result-row-value';
-    v.textContent = `${formatScore(score)} / 20`;
-    totalRow.appendChild(l);
-    totalRow.appendChild(v);
+    const tl = document.createElement('div');
+    tl.className = 'result-row-label';
+    tl.innerHTML = '<strong>TOTAL</strong>';
+    const tv = document.createElement('div');
+    tv.className = 'result-row-value';
+    tv.textContent = `${formatScore(score)} / 20`;
+    totalRow.appendChild(tl);
+    totalRow.appendChild(tv);
     summary.appendChild(totalRow);
     wrap.appendChild(summary);
 
@@ -109,11 +123,11 @@ export const achievementScreen = {
       const rec = document.createElement('div');
       rec.className = 'result-recommendation';
       const recTitle = document.createElement('strong');
-      recTitle.textContent = 'RECOMENDACIÓN DE LA ACTIVIDAD 3';
+      recTitle.textContent = 'RECOMENDACI\u00d3N DE LA ACTIVIDAD 3';
       const recText = document.createElement('p');
       recText.textContent = s.activity3Decision === PHASE3.activity3.options[PHASE3.activity3.correctIndex]
-        ? 'Acertaste al elegir la copia de seguridad más reciente. ' + PHASE3.activity3.explanation
-        : 'Tu decisión fue: "' + s.activity3Decision + '". ' + PHASE3.activity3.explanation;
+        ? 'Acertaste al elegir la copia de seguridad m\u00e1s reciente. ' + PHASE3.activity3.explanation
+        : 'Tu decisi\u00f3n fue: "' + s.activity3Decision + '". ' + PHASE3.activity3.explanation;
       rec.appendChild(recTitle);
       rec.appendChild(recText);
       wrap.appendChild(rec);
@@ -121,7 +135,7 @@ export const achievementScreen = {
 
     const restartBtn = document.createElement('button');
     restartBtn.className = 'btn btn--primary result-restart';
-    restartBtn.textContent = 'REINICIAR SIMULACIÓN';
+    restartBtn.textContent = 'REINICIAR SIMULACI\u00d3N';
     restartBtn.dataset.action = 'restart';
     restartBtn.addEventListener('click', () => {
       AudioManager.playSFX(AUDIO_SFX.CLICK);

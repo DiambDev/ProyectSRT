@@ -1,6 +1,6 @@
 import { AUDIO_SFX } from '../../../core/constants.js';
 import { AudioManager } from '../../../audio/audioManager.js';
-import { PHASE3 } from './phase3Data.js';
+import { PHASE3, formatScore } from './phase3Data.js';
 
 export function renderReport(screen) {
   screen._setP3({ currentActivity: 'report' });
@@ -8,19 +8,20 @@ export function renderReport(screen) {
 
   const wrap = document.createElement('div');
   wrap.className = 'p3-activity p3-report';
+  wrap.style.animation = 'fadeIn 0.5s ease forwards';
 
   const windowEl = document.createElement('div');
   windowEl.className = 'p3-report-window';
 
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
-  titlebar.innerHTML = '<span>REPORTE DE RECUPERACIÓN</span><div class="p3-dots"><span></span><span></span><span></span></div>';
+  titlebar.innerHTML = '<span>REPORTE DE RECUPERACI\u00d3N</span><div class="p3-dots"><span></span><span></span><span></span></div>';
+  windowEl.appendChild(titlebar);
 
   const heading = document.createElement('h2');
   heading.className = 'p3-report-heading';
-  heading.textContent = 'RECUPERACIÓN COMPLETADA';
+  heading.textContent = 'RECUPERACI\u00d3N COMPLETADA';
   heading.style.animation = 'fadeIn 0.5s ease forwards';
-  windowEl.appendChild(titlebar);
   windowEl.appendChild(heading);
 
   const stats = document.createElement('div');
@@ -47,7 +48,7 @@ export function renderReport(screen) {
 
   const note = document.createElement('p');
   note.className = 'p3-report-note';
-  note.textContent = 'Durante la recuperación se detectaron archivos con alteraciones. Analiza la información antes de continuar.';
+  note.textContent = 'Durante la recuperaci\u00f3n se detectaron archivos con alteraciones. Analiza la informaci\u00f3n antes de continuar.';
   windowEl.appendChild(note);
 
   const chip = document.createElement('div');
@@ -56,7 +57,7 @@ export function renderReport(screen) {
   windowEl.appendChild(chip);
 
   const startBtn = document.createElement('button');
-  startBtn.className = 'btn btn--primary';
+  startBtn.className = 'btn btn--primary p3-next';
   startBtn.textContent = 'INICIAR ACTIVIDAD 1';
   startBtn.dataset.action = 'start-a1';
   startBtn.addEventListener('click', () => {

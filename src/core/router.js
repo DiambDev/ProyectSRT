@@ -80,13 +80,14 @@ export const Router = {
 
   async _enterScreen(screen, transition) {
     const el = container();
-    if (!screen.container) {
-      screen.container = document.createElement('div');
-      screen.container.className = 'screen';
-      screen.container.id = `screen-${screen.id}`;
-      if (screen.render) screen.render(screen.container);
-      el.appendChild(screen.container);
+    if (screen.container && screen.container.parentNode) {
+      screen.container.parentNode.removeChild(screen.container);
     }
+    screen.container = document.createElement('div');
+    screen.container.className = 'screen';
+    screen.container.id = `screen-${screen.id}`;
+    if (screen.render) screen.render(screen.container);
+    el.appendChild(screen.container);
     screen.container.classList.add('active');
     screen.container.style.opacity = '0';
     screen.container.style.transition = `opacity ${transition.duration}ms ease`;

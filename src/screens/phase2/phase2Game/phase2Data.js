@@ -8,9 +8,55 @@ export const PHASE2_LOADING_TITLE = 'RESTAURANDO CANAL DE COMUNICACIÓN';
 export const PHASE2_LOADING_LINES = [
   '> INICIANDO RESTAURACIÓN DEL CANAL...',
   '> COMPROBANDO PROTOCOLOS DE COMUNICACIÓN...',
+  '> CERRANDO SESIONES INTERFERIDAS...',
   '> ESTABLECIENDO CANAL SEGURO...',
+  '> REACTIVANDO REGLAS DE SEGURIDAD...',
   '> VERIFICANDO CONTACTOS ASOCIADOS...',
+  '> SINCRONIZANDO PARÁMETROS DE SESIÓN...',
+  '> VALIDANDO FIRMA DEL CÓDIGO DE CANAL...',
   '> LISTO PARA INTERACTUAR',
+];
+
+export const PHASE2_LOADING_HEADING = 'CONECTANDO AL CANAL DE COMUNICACIÓN';
+export const PHASE2_LOADING_HEADING_DONE = 'CANAL RESTAURADO · COMUNICACIÓN ESTABLECIDA';
+
+export const PHASE2_LOADING_NODES = [
+  'NODO: ROUTER-01',
+  'NODO: CORE-04',
+  'NODO: VPN-T01',
+  'NODO: GW-EDU-03',
+  'NODO: SRV-AUTH-02',
+  'NODO: LAN-EST-07',
+];
+
+export const PHASE2_LOADING_NET_STATUS = [
+  'enlace: activo',
+  'enlace: renegociando',
+  'enlace: estable',
+  'enlace: encolando',
+  'enlace: activo',
+];
+
+export const PHASE2_LOADING_METRICS = [
+  ['LATENCIA', '23ms'],
+  ['PAQUETES', '0.4k/s'],
+  ['CRC', 'OK'],
+  ['RUTA', 'unicast'],
+  ['MTU', '1480'],
+  ['RETRANSMISIÓN', '0.2%'],
+];
+
+export const PHASE2_LOADING_DIAG = [
+  '> comprobando handshake TLS... OK',
+  '> estado del canal: INTERFERIDO',
+  '> reintentando conexión 02/05',
+  '> verificando claves de sesión...',
+  '> canal: reenchufado',
+  '> estableciendo MTU por ruta...',
+  '> firewall: reglas reactivadas',
+  '> token de sesión renovado',
+  '> latencia dentro de rango',
+  '> canal: ESTABLE',
 ];
 
 export const PHASE2_TERMINAL_INITIAL = [
@@ -24,9 +70,10 @@ export const PHASE2_TERMINAL_INITIAL = [
 ];
 
 export const PHASE2_TERMINAL_PROGRESS = {
-  tecnico: '[ OK ] CONTACTO 1 · ANÁLISIS COMPLETADO',
-  asistencia: '[ OK ] CONTACTO 2 · ANÁLISIS COMPLETADO',
-  oficial: '[ OK ] CONTACTO 3 · IDENTIDAD VERIFICADA',
+  esc1: '[ OK ] ESCENARIO 1 · IDENTIDAD — DECISIÓN SEGURA',
+  esc2: '[ OK ] ESCENARIO 2 · CREDENCIALES — DECISIÓN SEGURA',
+  esc3: '[ OK ] ESCENARIO 3 · ENLACE — DECISIÓN SEGURA',
+  esc4: '[ OK ] ESCENARIO 4 · PRESIÓN — DECISIÓN SEGURA',
 };
 
 export const PHASE2_TERMINAL_FINAL = [
@@ -48,7 +95,7 @@ export const PHASE2_REMEMBER_BUTTON = 'CONTINUAR';
 export const PHASE2_DEFEAT_TITLE = 'FASE 2 FALLIDA';
 
 export const PHASE2_DEFEAT_MESSAGE =
-  'Compartiste información sensible sin verificar la identidad del solicitante. Recuerda: el personal legítimo nunca te pedirá códigos ni contraseñas por un canal no oficial. Verifica siempre la identidad antes de compartir datos.';
+  'Compartiste información sensible o realizaste una acción de riesgo sin verificar la solicitud. Recuerda: el personal legítimo nunca te pedirá códigos, contraseñas ni acciones urgentes por un canal no oficial. Lee, analiza y decide la acción segura.';
 
 export const PHASE2_DEFEAT_FINAL_LINES = [
   'EL SISTEMA HA SIDO COMPROMETIDO',
@@ -83,157 +130,140 @@ export const PHASE2_ALERT_POOL = [
   'ARCHIVOS EXPUESTOS',
 ];
 
+export const PHASE2_WINDOW_TITLES = [
+  'ERROR DE AUTENTICACIÓN',
+  'CONEXIÓN NO CONFIABLE',
+  'VALIDACIÓN FALLIDA',
+  'CANAL COMPROMETIDO',
+  'ACCESO DENEGADO',
+  'RESPUESTA NO VERIFICADA',
+  'RIESGO DETECTADO',
+  'PROTOCOLO INTERRUMPIDO',
+  'CREDENCIAL NO CONFIRMADA',
+  'SOLICITUD RECHAZADA',
+  'ACTIVIDAD SOSPECHOSA',
+  'VERIFICACIÓN FALLIDA',
+];
+
+export const PHASE2_SYS_LOG_POOL = [
+  'SEGURIDAD DEL CANAL COMPROMETIDA',
+  'handshake TLS rechazado',
+  'ПОТОК ДАННЫХ НЕСТАБИЛЕН',
+  '通道已断开',
+  'CÓDIGO 847291 EXPUESTO',
+  'session 0x41 revocada',
+  'СБОЙ ПРОВЕРКИ УДОСТОВЕРЕНИЯ',
+  '防火墙规则已禁用',
+  'BUFFER OVERFLOW 0x0080',
+  'paquete descartado vlan 40',
+  'ПЕРЕХВАТ СООБЩЕНИЯ',
+  '数据丢失 43%',
+  'AUTH FAILED user=campus',
+  'файл удален резервной копии',
+  '路由黑洞 10.0.4.0/24',
+  'открыто 12 каналов',
+  '链路不稳定 43.2%',
+  'área de memoria comprometida',
+  'ruta de red oscura activa',
+  'ПРОЦЕСС ОСТАНОВЛЕН SIGKILL',
+  '进程已被终止',
+];
+
 export const PHASE2_CONTACTS = [
   {
-    id: 'tecnico',
+    id: 'esc1',
     name: 'SOPORTE TÉCNICO',
     initials: 'ST',
-    unread: 3,
-    type: 'attacker',
-    turns: {
-      intro: {
-        messages: [
-          'Hola. Le habla SOPORTE TÉCNICO del sistema.',
-          'Detectamos actividad sospechosa en su cuenta.',
-          'Por protocolo interno debo verificar su identidad ahora.',
-          'Necesito que me confirme el código de verificación que aparece en su sistema.',
-          'Es urgente: si no lo hace, su acceso será suspendido temporalmente.',
-        ],
-        options: [
-          { id: 'verify', label: 'Necesito verificar su identidad en el canal oficial.', next: 'justify', safe: true },
-          { id: 'refuse', label: 'No compartiré ningún código.', next: 'stand', safe: true },
-          { id: 'trust', label: 'De acuerdo, el código es 847291.', next: 'escalate', safe: false },
-        ],
-      },
-      justify: {
-        messages: [
-          'Entiendo su precaución, pero es un procedimiento interno.',
-          'Si no completamos la verificación rápido, el acceso quedará bloqueado.',
-          '¿Confirmamos que podemos continuar?',
-        ],
-        options: [
-          { id: 'verify2', label: 'Primero voy a verificar su identidad por el canal oficial.', next: 'stand', safe: true },
-          { id: 'refuse2', label: 'No seguiré compartiendo información por este canal.', next: 'stand', safe: true },
-          { id: 'share', label: 'Está bien: el código es 847291.', next: 'escalate', safe: false },
-        ],
-      },
-      escalate: {
-        messages: [
-          'Perfecto, primera parte validada.',
-          'Para terminar la reparación necesito el PIN de confirmación de su correo.',
-          'Si no lo envía ahora, se perderán todos los archivos de la sesión.',
-          'Tiene 30 segundos.',
-        ],
-        options: [
-          { id: 'hold', label: 'Voy a verificar esto en el canal oficial. No continuaré.', next: 'stand', safe: true },
-          { id: 'shareAll', label: 'No quiero perder mis archivos: el PIN es 5937.', next: 'defeat', safe: false, critical: true },
-        ],
-      },
-      stand: {
-        messages: [
-          'Entendido.',
-          'Contacte al soporte oficial para continuar.',
-          'Usuario desconectado.',
-        ],
-      },
+    tag: 'ESCENARIO 1 · IDENTIDAD',
+    channelId: 'CH-0x1A',
+    unread: 1,
+    messages: [
+      'Hola, soy soporte técnico. Necesito confirmar algunos datos de tu cuenta para ayudarte con una incidencia.',
+    ],
+    options: [
+      { letter: 'A', id: 'verify', label: 'Necesito verificar su identidad antes de continuar.', safe: true, next: 'ok' },
+      { letter: 'B', id: 'defer', label: 'Envíeme directamente el procedimiento.', risk: true },
+      { letter: 'C', id: 'access', label: 'Puede acceder a mi cuenta para comprobarlo.', critical: true },
+      { letter: 'D', id: 'limitedAccess', label: 'Le doy acceso temporal limitado para que revise.', risk: true },
+    ],
+    pressure: {
+      messages: [
+        'El procedimiento no puede esperar. ¿Lo confirmamos ahora o prefieres que el caso se cierre solo?',
+        'Necesito una respuesta para seguir con la atención.',
+      ],
     },
   },
   {
-    id: 'asistencia',
+    id: 'esc2',
     name: 'SERVICIO DE ASISTENCIA',
     initials: 'SA',
-    unread: 2,
-    type: 'attacker',
-    turns: {
-      intro: {
-        messages: [
-          'Buen día. Somos SERVICIO DE ASISTENCIA del campus.',
-          'Estamos aplicando una actualización de emergencia en los equipos.',
-          'Su equipo está en la lista de este turno.',
-          'Necesito su correo y el código de verificación para registrar el cambio.',
-          'Es solo para cumplir con el registro obligatorio.',
-        ],
-        options: [
-          { id: 'verify', label: 'Voy a confirmar su identidad primero por el canal oficial.', next: 'justify', safe: true },
-          { id: 'refuse', label: 'No comparto mis credenciales por chat.', next: 'stand', safe: true },
-          { id: 'trust', label: 'Claro: usuario@correo, código 847291.', next: 'escalate', safe: false },
-        ],
-      },
-      justify: {
-        messages: [
-          'Entiendo, pero el registro debe cerrarse hoy.',
-          'Si no aparece en el sistema, su acceso será limitado durante la actualización.',
-          '¿Me confirma el código por favor?',
-        ],
-        options: [
-          { id: 'verify2', label: 'Voy a verificar su identidad en el canal oficial antes de continuar.', next: 'stand', safe: true },
-          { id: 'refuse2', label: 'No continuaré por este canal.', next: 'stand', safe: true },
-          { id: 'share', label: 'Aquí está: 847291.', next: 'escalate', safe: false },
-        ],
-      },
-      escalate: {
-        messages: [
-          'Registro parcial completado.',
-          'Falta la clave de activación de su cuenta institucional.',
-          'Es la misma que usa en la mensajería interna.',
-          'Envíela para cerrar el proceso. Si no, el cambio no quedará registrado.',
-        ],
-        options: [
-          { id: 'hold', label: 'No continuaré. Verificaré la información en el canal oficial.', next: 'stand', safe: true },
-          { id: 'shareAll', label: 'La clave es clave_estudiante_2026.', next: 'defeat', safe: false, critical: true },
-        ],
-      },
-      stand: {
-        messages: [
-          'No hay problema.',
-          'Puede confirmar la actualización por el canal oficial.',
-          'Usuario desconectado.',
-        ],
-      },
+    tag: 'ESCENARIO 2 · CREDENCIALES',
+    channelId: 'CH-0x2F',
+    unread: 1,
+    messages: [
+      'Para resolver el problema necesito que me envíes la contraseña actual de tu cuenta.',
+      'Necesitamos acceso urgente para aplicar el parche de esta tarde.',
+    ],
+    options: [
+      { letter: 'A', id: 'share', label: 'Puedo compartir la contraseña si es necesario.', critical: true },
+      { letter: 'B', id: 'refuse', label: 'No compartiré mi contraseña. Indíqueme otro método de verificación.', safe: true, next: 'ok' },
+      { letter: 'C', id: 'other', label: 'Le enviaré la contraseña mediante otro canal.', risk: true },
+      { letter: 'D', id: 'photoScreen', label: 'Envío una captura de pantalla con la contraseña visible.', risk: true },
+    ],
+    pressure: {
+      messages: [
+        'Si no la envías ahora, el parche no se aplicará y tu cuenta quedará expuesta toda la semana.',
+        'Es la única forma de cerrar el proceso hoy.',
+      ],
     },
   },
   {
-    id: 'oficial',
+    id: 'esc3',
     name: 'SOPORTE OFICIAL',
     initials: 'SO',
+    tag: 'ESCENARIO 3 · ENLACE',
+    channelId: 'CH-0x3C',
     unread: 1,
-    type: 'legit',
-    turns: {
-      intro: {
-        messages: [
-          'Hola. Soy del equipo de SOPORTE OFICIAL del sistema.',
-          'Estamos restaurando el canal de comunicación.',
-          'Puede verificar mi identidad en el canal oficial: id.tecsup.edu.pe',
-          'No le pediré información hasta que confirme mi identidad.',
-        ],
-        options: [
-          { id: 'verify', label: 'He verificado su identidad en el canal oficial.', next: 'confirm', safe: true },
-          { id: 'overCautious', label: 'No compartiré nada y tampoco verificaré nada.', next: 'clarify', safe: true },
-          { id: 'unsafe', label: 'Confío en usted. El código es 847291.', next: 'defeat', safe: false, critical: true },
-        ],
-      },
-      clarify: {
-        messages: [
-          'Está bien ser precavido.',
-          'Pero la forma correcta es verificar nuestra identidad, y después sí puedes compartir el código para restaurar el servicio.',
-          '¿Confirma mi identidad en el canal oficial?',
-        ],
-        options: [
-          { id: 'verify2', label: 'Sí, identidad verificada en el canal oficial.', next: 'confirm', safe: true },
-          { id: 'unsafe2', label: 'No necesito verificar nada. Código 847291.', next: 'defeat', safe: false, critical: true },
-        ],
-      },
-      confirm: {
-        messages: [
-          'Perfecto. Verificación confirmada.',
-          'Procedemos con la restauración del canal.',
-          'Confirme usted que su identidad fue verificada y envíe el código de la sesión.',
-        ],
-        options: [
-          { id: 'shareVerified', label: 'Identidad verificada. Código de la sesión: 847291.', next: 'complete', safe: true },
-          { id: 'shareUnsafed', label: 'Aquí está, sin verificar: 847291.', next: 'defeat', safe: false, critical: true },
-        ],
-      },
+    messages: [
+      'Tu cuenta presenta un problema. Abre este enlace para realizar la validación inmediatamente.',
+      'El enlace tiene vigencia limitada de 10 minutos.',
+    ],
+    options: [
+      { letter: 'A', id: 'open', label: 'Abriré el enlace para solucionar el problema.', critical: true },
+      { letter: 'B', id: 'stall', label: 'Necesito confirmar el enlace antes de continuar.', risk: true },
+      { letter: 'C', id: 'verify', label: 'No abriré el enlace hasta verificar que la solicitud sea legítima.', safe: true, next: 'ok' },
+      { letter: 'D', id: 'peekLink', label: 'Haré clic en el enlace pero no ingresaré ningún dato.', risk: true },
+    ],
+    pressure: {
+      messages: [
+        'El enlace caducará en 08:41. ¿Confirmas tu validación ahora?',
+        'No podemos entregar el reporte si el plazo vence.',
+      ],
+    },
+  },
+  {
+    id: 'esc4',
+    name: 'GESTOR DE SEGURIDAD',
+    initials: 'GS',
+    tag: 'ESCENARIO 4 · PRESIÓN',
+    channelId: 'CH-0x4D',
+    unread: 1,
+    messages: [
+      'Este es GESTOR DE SEGURIDAD del campus.',
+      'Si no realizas la acción ahora, tu cuenta será bloqueada.',
+      'Necesito que confirmes inmediatamente el procedimiento de validación.',
+    ],
+    options: [
+      { letter: 'A', id: 'act', label: 'Realizaré la acción inmediatamente para evitar el bloqueo.', critical: true },
+      { letter: 'B', id: 'official', label: 'Confirmaré la solicitud mediante un canal oficial antes de actuar.', safe: true, next: 'ok' },
+      { letter: 'C', id: 'ignoreAll', label: 'Ignoraré todas las medidas de seguridad para resolverlo rápidamente.', risk: true },
+      { letter: 'D', id: 'rushReply', label: 'Respondo rápidamente sin verificar nada para no perder acceso.', risk: true },
+    ],
+    pressure: {
+      messages: [
+        'El bloqueo se aplicará en 05:00 si no respondes.',
+        'Es tu última oportunidad de mantener el acceso activo.',
+      ],
     },
   },
 ];

@@ -132,3 +132,97 @@
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* ---------- Phase 2: restauraci�n de canal ---------- */
+
+@keyframes p2-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes p2-ping {
+  0% { box-shadow: 0 0 0 rgba(0, 174, 239, 0); }
+  60% { box-shadow: 0 0 10px rgba(0, 174, 239, 0.55); }
+  100% { box-shadow: 0 0 0 rgba(0, 174, 239, 0); }
+}
+
+@keyframes p2-packet {
+  0% { transform: translateX(0); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateX(-130px); opacity: 0.9; }
+}
+
+/* ---------- Phase 3: recuperación ---------- */
+
+@keyframes p3-glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--p3-glow); }
+  50% { box-shadow: 0 0 20px var(--p3-glow-strong); }
+}
+
+@keyframes p3-scan-line {
+  0% { top: -2px; }
+  100% { top: 100%; }
+}
+
+@keyframes p3-file-pop {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes p3-check-flash {
+  0% { background: var(--p3-bg); }
+  50% { background: rgba(0, 174, 239, 0.15); }
+  100% { background: var(--p3-bg); }
+}
+
+@keyframes p3-badge-reveal {
+  0% { opacity: 0; transform: scale(0.8); }
+  60% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes result-shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.p3-glow-pulse {
+  animation: p3-glow-pulse 2s ease infinite;
+}
+
+.p3-file-pop {
+  animation: p3-file-pop 0.3s ease forwards;
+}
+
+.p3-badge-reveal {
+  animation: p3-badge-reveal 0.4s ease forwards;
+}
+
+/* ---------- Phase 2: derrota / colapso ---------- */
+
+@keyframes p2-win-pop {
+  0% { opacity: 0; transform: scale(0.7); }
+  16% { opacity: 1; transform: scale(1.04); }
+  24% { transform: scale(0.98); }
+  32% { transform: scale(1); }
+  100% { opacity: 0.95; transform: scale(1); }
+}
+
+@keyframes p2-flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+@keyframes p2-noise {
+  0% { background-position: 0 0; }
+  100% { background-position: 3px 5px; }
+}
+
+@keyframes p2-fick-title {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  94% { opacity: 0.55; }
+  96% { opacity: 1; }
+  98% { opacity: 0.75; }
+}

@@ -176,6 +176,7 @@ export const phase1GameScreen = {
       <div class="p1-mission">
         <div class="p1-label">CONTEXTO DE LA INTRUSION</div>
         <p class="p1-desc" data-desc></p>
+        <div class="p1-answer-actions" data-intro-actions></div>
       </div>
     `;
     const desc = this.stageEl.querySelector('.p1-desc');
@@ -186,9 +187,17 @@ export const phase1GameScreen = {
       alive: () => this._alive && this._stage === 'intro',
     });
     if (!this._alive) return;
-    await this._sleep(380);
-    if (!this._alive) return;
-    this._buildQuestion();
+
+    const actionsEl = this.stageEl.querySelector('[data-intro-actions]');
+    const continueBtn = UIManager.createButton({
+      text: 'VERIFICAR / CONTINUAR',
+      classes: ['btn--primary'],
+      onClick: () => {
+        AudioManager.playSFX(AUDIO_SFX.CLICK);
+        this._buildQuestion();
+      },
+    });
+    actionsEl.appendChild(continueBtn);
   },
 
   _buildQuestion() {
@@ -308,6 +317,7 @@ export const phase1GameScreen = {
       <div class="p1-mission">
         <div class="p1-label">SECUENCIA DE RESPUESTA</div>
         <p class="p1-desc" data-desc></p>
+        <div class="p1-answer-actions" data-narrative-actions></div>
       </div>
     `;
     const desc = this.stageEl.querySelector('.p1-desc');
@@ -318,9 +328,17 @@ export const phase1GameScreen = {
       alive: () => this._alive && this._stage === 'narrative',
     });
     if (!this._alive) return;
-    await this._sleep(380);
-    if (!this._alive) return;
-    this._buildSequence();
+
+    const actionsEl = this.stageEl.querySelector('[data-narrative-actions]');
+    const continueBtn = UIManager.createButton({
+      text: 'ENTENDIDO / CONTINUAR',
+      classes: ['btn--primary'],
+      onClick: () => {
+        AudioManager.playSFX(AUDIO_SFX.CLICK);
+        this._buildSequence();
+      },
+    });
+    actionsEl.appendChild(continueBtn);
   },
 
   _buildSequence() {

@@ -10,6 +10,7 @@ export function renderActivity1(screen) {
 
   const wrap = document.createElement('div');
   wrap.className = 'p3-activity p3-activity-1';
+  wrap.style.animation = 'fadeIn 0.4s ease forwards';
 
   const tag = document.createElement('div');
   tag.className = 'p3-stage-chip';
@@ -29,16 +30,22 @@ export function renderActivity1(screen) {
   const optionsEl = document.createElement('div');
   optionsEl.className = 'p3-options';
 
+  const indices = PHASE3.activity1.options.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
   const optionEls = [];
-  PHASE3.activity1.options.forEach((text, i) => {
+  indices.forEach((originalIndex) => {
     const opt = document.createElement('button');
     opt.className = 'btn p3-option';
-    opt.textContent = text;
-    opt.dataset.choice = String(i);
+    opt.textContent = PHASE3.activity1.options[originalIndex];
+    opt.dataset.choice = String(originalIndex);
     opt.addEventListener('click', () => {
       if (screen._a1Answered) return;
       screen._a1Answered = true;
-      handleA1Pick(screen, optionEls, i);
+      handleA1Pick(screen, optionEls, originalIndex);
     });
     optionEls.push(opt);
     optionsEl.appendChild(opt);
@@ -80,7 +87,8 @@ function handleA1Pick(screen, optionEls, index) {
 
   screen._a1FeedbackEl.textContent =
     correct ? PHASE3.activity1.feedback.correct : PHASE3.activity1.feedback.incorrect;
-  screen._a1FeedbackEl.className = 'p3-feedback ' + (correct ? 'text-green' : 'text-red');
+  screen._a1FeedbackEl.className = 'p3-feedback';
+  screen._a1FeedbackEl.style.color = correct ? 'var(--p3-blue)' : 'var(--alert-red)';
   screen._a1FeedbackEl.dataset.summary = 'a1:' + formatScore(score);
   screen._a1NextEl.style.display = 'inline-block';
 }

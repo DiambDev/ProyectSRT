@@ -15,6 +15,26 @@
   --text-muted: #333333;
   --text-green: #00ff41;
 
+  --p3-blue: #00aeef;
+  --p3-blue-dark: #005a8c;
+  --p3-blue-light: #33c4ff;
+  --p3-blue-dim: #003d5c;
+  --p3-bg: #0a1628;
+  --p3-surface: #0f1f3a;
+  --p3-surface-alt: #132a4a;
+  --p3-border: #1a3a5c;
+  --p3-border-light: #2a5a8c;
+  --p3-glow: rgba(0, 174, 239, 0.3);
+  --p3-glow-strong: rgba(0, 174, 239, 0.6);
+
+  --tecsup-blue: #00aeef;
+  --tecsup-white: #ffffff;
+  --tecsup-bg: #f0f4f8;
+  --tecsup-surface: #ffffff;
+  --tecsup-border: #d0dce8;
+  --tecsup-text: #1a2a3a;
+  --tecsup-text-dim: #5a7a9c;
+
   --font-mono: 'Courier New', Courier, monospace;
   --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 

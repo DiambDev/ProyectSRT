@@ -19,10 +19,11 @@ export function renderActivity3(screen) {
 
   const windowEl = document.createElement('div');
   windowEl.className = 'p3-a3-window';
+  windowEl.style.animation = 'fadeIn 0.4s ease forwards';
 
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
-  titlebar.innerHTML = '<span>ACTIVIDAD 3 DE 3 · ARCHIVOS ELIMINADOS</span>';
+  titlebar.innerHTML = '<span>ACTIVIDAD 3 DE 3 \u00b7 ARCHIVOS ELIMINADOS</span>';
   windowEl.appendChild(titlebar);
 
   const timerEl = document.createElement('div');
@@ -166,11 +167,13 @@ function handleA3Pick(screen, optionEls, index) {
 
   if (correct) {
     screen._a3FeedbackEl.textContent = PHASE3.activity3.explanation;
-    screen._a3FeedbackEl.className = 'p3-feedback text-green';
+    screen._a3FeedbackEl.className = 'p3-feedback';
+    screen._a3FeedbackEl.style.color = 'var(--p3-blue)';
   } else {
     screen._a3FeedbackEl.textContent =
-      'Opción registrada. Recuerda: la copia más reciente minimiza la pérdida de trabajo.';
-    screen._a3FeedbackEl.className = 'p3-feedback text-yellow';
+      'Opci\u00f3n registrada. Recuerda: la copia m\u00e1s reciente minimiza la p\u00e9rdida de trabajo.';
+    screen._a3FeedbackEl.className = 'p3-feedback';
+    screen._a3FeedbackEl.style.color = 'var(--alert-yellow)';
   }
   screen._a3NextEl.style.display = 'inline-block';
 }
@@ -182,8 +185,9 @@ function handleTimeout(screen) {
   screen._a3TimerEl.classList.add('critical');
   AudioManager.playSFX(AUDIO_SFX.ALERT);
   screen._a3FeedbackEl.textContent =
-    'TIEMPO AGOTADO. Se registró: ' + decision + '.';
-  screen._a3FeedbackEl.className = 'p3-feedback text-red';
+    'TIEMPO AGOTADO. Se registr\u00f3: ' + decision + '.';
+  screen._a3FeedbackEl.className = 'p3-feedback';
+  screen._a3FeedbackEl.style.color = 'var(--alert-red)';
   screen._setP3({ activity3TimeLeft: 0 });
   screen._a3NextEl.style.display = 'inline-block';
 }
