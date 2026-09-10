@@ -1,17 +1,13 @@
 .screen--achievement {
   background: var(--tecsup-bg, #f0f4f8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
   overflow-y: auto;
+  padding: 24px;
 }
 
 .screen--achievement .result-root {
   width: 100%;
-  max-width: 720px;
-  display: flex;
-  justify-content: center;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
 .screen--achievement .result-card {
@@ -19,7 +15,7 @@
   background: var(--tecsup-surface, #ffffff);
   border: 1px solid var(--tecsup-border, #d0dce8);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  padding: 40px 36px 36px;
+  padding: 36px 32px 32px;
   text-align: center;
   box-sizing: border-box;
 }
@@ -29,35 +25,35 @@
   display: block;
   height: 4px;
   background: linear-gradient(90deg, var(--tecsup-blue, #00aeef), var(--tecsup-white, #ffffff), var(--tecsup-blue, #00aeef));
-  margin: -40px -36px 32px;
+  margin: -36px -32px 28px;
 }
 
 .screen--achievement .result-logo {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .screen--achievement .result-logo img {
   display: block;
   margin: 0 auto;
-  max-height: 100px;
-  max-width: 200px;
+  max-height: 90px;
+  max-width: 180px;
   object-fit: contain;
 }
 
 .screen--achievement .result-kicker {
-  font-size: 12px;
-  letter-spacing: 4px;
+  font-size: 11px;
+  letter-spacing: 3px;
   color: var(--tecsup-blue, #00aeef);
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .screen--achievement .result-title {
-  font-size: clamp(22px, 3vw, 30px);
-  letter-spacing: 5px;
+  font-size: clamp(20px, 2.5vw, 28px);
+  letter-spacing: 4px;
   color: var(--tecsup-text, #1a2a3a);
   text-transform: uppercase;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .screen--achievement .result-score {
@@ -65,18 +61,18 @@
   align-items: baseline;
   justify-content: center;
   gap: 6px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .screen--achievement .result-score-number {
-  font-size: clamp(48px, 8vw, 72px);
+  font-size: clamp(44px, 7vw, 68px);
   font-weight: 800;
   color: var(--tecsup-blue, #00aeef);
   line-height: 1;
 }
 
 .screen--achievement .result-score-total {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--tecsup-text-dim, #5a7a9c);
 }
@@ -84,15 +80,15 @@
 .screen--achievement .result-summary {
   text-align: left;
   border: 1px solid var(--tecsup-border, #d0dce8);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .screen--achievement .result-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 12px 16px;
+  gap: 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--tecsup-border, #d0dce8);
 }
 
@@ -103,22 +99,23 @@
 .screen--achievement .result-row-label {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
+  min-width: 0;
 }
 
 .screen--achievement .result-row-label strong {
-  font-size: 12px;
-  letter-spacing: 2px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
   color: var(--tecsup-text, #1a2a3a);
 }
 
 .screen--achievement .result-row-label span {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--tecsup-text-dim, #5a7a9c);
 }
 
 .screen--achievement .result-row-value {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--tecsup-blue, #00aeef);
   white-space: nowrap;
@@ -129,41 +126,41 @@
 }
 
 .screen--achievement .result-total .result-row-value {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--tecsup-blue, #00aeef);
 }
 
 .screen--achievement .result-message {
-  margin: 20px 0;
-  padding: 16px;
+  margin: 16px 0;
+  padding: 14px;
   border: 1px solid var(--tecsup-border, #d0dce8);
   background: rgba(0, 174, 239, 0.03);
   text-align: left;
 }
 
 .screen--achievement .result-message h3 {
-  font-size: 18px;
+  font-size: 16px;
   color: var(--tecsup-blue, #00aeef);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: 1px;
 }
 
 .screen--achievement .result-message p {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--tecsup-text, #1a2a3a);
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .screen--achievement .result-recommendation {
   text-align: left;
-  margin-bottom: 24px;
-  padding: 14px 16px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
   border-left: 3px solid var(--alert-yellow);
   background: rgba(240, 192, 64, 0.04);
 }
 
 .screen--achievement .result-recommendation strong {
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 1.5px;
   color: var(--alert-yellow);
   text-transform: uppercase;
@@ -171,14 +168,14 @@
 
 .screen--achievement .result-recommendation p {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--tecsup-text, #1a2a3a);
   line-height: 1.6;
 }
 
 .screen--achievement .result-restart {
-  font-size: 15px;
-  padding: 14px 30px;
+  font-size: 14px;
+  padding: 12px 28px;
   background: var(--tecsup-blue, #00aeef);
   color: #ffffff;
   border: none;
@@ -201,14 +198,17 @@
 }
 
 @media (max-width: 640px) {
+  .screen--achievement {
+    padding: 16px;
+  }
   .screen--achievement .result-card {
-    padding: 28px 18px 24px;
+    padding: 24px 16px 20px;
   }
   .screen--achievement .result-card::before {
-    margin: -28px -18px 24px;
+    margin: -24px -16px 20px;
   }
   .screen--achievement .result-score-number {
-    font-size: 48px;
+    font-size: 44px;
   }
   .screen--achievement .result-row {
     flex-direction: column;

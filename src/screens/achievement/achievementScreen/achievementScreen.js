@@ -40,10 +40,6 @@ export const achievementScreen = {
     img.className = 'result-logo-img';
     img.alt = 'TECSUP';
     img.src = 'src/images/tecsuplogo2.png';
-    img.style.maxHeight = '120px';
-    img.style.maxWidth = '180px';
-    img.style.margin = '0 auto 20px';
-    img.style.display = 'block';
     logoEl.appendChild(img);
     wrap.appendChild(logoEl);
 
