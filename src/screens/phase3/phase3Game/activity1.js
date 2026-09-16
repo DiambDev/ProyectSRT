@@ -22,57 +22,68 @@ export function renderActivity1(screen) {
   title.textContent = PHASE3.activity1.title;
   wrap.appendChild(title);
 
+  // === EVENT VIEWER WINDOW CONTAINER ===
   const eventWindow = document.createElement('div');
-  eventWindow.className = 'p3-event-window';
+  eventWindow.className = 'p3-eventviewer';
 
+  // Title bar
   const titlebar = document.createElement('div');
-  titlebar.className = 'p3-titlebar';
-  titlebar.innerHTML = '<span>VISOR DE EVENTOS DEL SISTEMA</span>';
+  titlebar.className = 'p3-ev-titlebar';
+  titlebar.innerHTML = '<span class="p3-ev-title">VISOR DE EVENTOS — SISTEMA</span><span class="p3-ev-dots"><span></span><span></span><span></span></span>';
   eventWindow.appendChild(titlebar);
 
+  // Filter toolbar
   const toolbar = document.createElement('div');
-  toolbar.className = 'p3-event-toolbar';
+  toolbar.className = 'p3-ev-toolbar';
+
   const filterLabel = document.createElement('span');
-  filterLabel.textContent = 'Filtrar: ';
+  filterLabel.className = 'p3-ev-filter-label';
+  filterLabel.textContent = 'Origen:';
+
   const filterSelect = document.createElement('select');
-  filterSelect.className = 'p3-filter-select';
-  ['Todos', 'Inicio de sesi\u00f3n', 'Acceso a archivo', 'Modificaci\u00f3n de registro', 'Creaci\u00f3n de archivo', 'FALLO'].forEach((opt, i) => {
+  filterSelect.className = 'p3-ev-filter';
+
+  const allOpt = document.createElement('option');
+  allOpt.value = 'all';
+  allOpt.textContent = 'Todos';
+  filterSelect.appendChild(allOpt);
+
+  const sources = ['SEGURIDAD', 'SISTEMA', 'APLICACIONES'];
+  sources.forEach((src) => {
     const o = document.createElement('option');
-    o.value = String(i);
-    o.textContent = opt;
+    o.value = src;
+    o.textContent = src;
     filterSelect.appendChild(o);
   });
-  filterSelect.addEventListener('change', () => {
-    const val = filterSelect.value;
-    filterLabel.textContent = 'Filtrar: ';
-    filterLabel.appendChild(filterSelect.options[filterSelect.selectedIndex]);
-    filterTableRows();
-  });
+
+  filterSelect.addEventListener('change', () => filterTableRows());
   toolbar.appendChild(filterLabel);
   toolbar.appendChild(filterSelect);
   eventWindow.appendChild(toolbar);
 
+  // Event table with internal scroll
   const tableWrap = document.createElement('div');
-  tableWrap.className = 'p3-event-table-wrap';
+  tableWrap.className = 'p3-ev-tablewrap';
   const table = document.createElement('table');
-  table.className = 'p3-event-table';
+  table.className = 'p3-ev-table';
+
   const thead = document.createElement('thead');
-  thead.innerHTML = '<tr><th>ID</th><th>Fecha/Hora</th><th>Tipo</th><th>Usuario</th><th>Origen</th><th>Resultado</th><th>Event ID</th></tr>';
+  thead.innerHTML = '<tr><th>#</th><th>Event ID</th><th>Fecha/Hora</th><th>Usuario</th><th>Tipo</th><th>Origen</th><th>Estado</th></tr>';
   table.appendChild(thead);
+
   const tbody = document.createElement('tbody');
   PHASE3.activity1Events.forEach((ev, i) => {
     const tr = document.createElement('tr');
-    tr.dataset.type = ev.type;
-    tr.dataset.result = ev.result;
+    tr.dataset.source = ev.sourceType;
     tr.dataset.idx = String(i);
     const cells = [
-      String(ev.id),
-      ev.time,
-      ev.type,
-      ev.user,
-      ev.source,
-      ev.result,
+      String(i + 1),
       String(ev.eventid),
+      ev.time,
+      ev.user,
+      ev.type,
+      ev.source,
+      ev.status,
     ];
     cells.forEach((c) => {
       const td = document.createElement('td');
@@ -86,6 +97,7 @@ export function renderActivity1(screen) {
   eventWindow.appendChild(tableWrap);
   wrap.appendChild(eventWindow);
 
+  // === QUESTION ===
   const question = document.createElement('p');
   question.className = 'p3-question';
   question.textContent = PHASE3.activity1.question;
@@ -124,7 +136,6 @@ export function renderActivity1(screen) {
   const nextBtn = document.createElement('button');
   nextBtn.className = 'btn btn--primary p3-next';
   nextBtn.textContent = 'CONTINUAR A ACTIVIDAD 2';
-  nextBtn.dataset.action = 'next-a1';
   nextBtn.style.display = 'none';
   nextBtn.addEventListener('click', () => {
     AudioManager.playSFX(AUDIO_SFX.CLICK);
@@ -141,14 +152,11 @@ export function renderActivity1(screen) {
     const filterVal = filterSelect.value;
     const rows = tbody.querySelectorAll('tr');
     rows.forEach((row) => {
-      if (filterVal === '0') {
+      if (filterVal === 'all') {
         row.style.display = '';
         return;
       }
-      const typeMatch = filterVal === '1' && row.dataset.type === 'Inicio de sesi\u00f3n';
-      const resultMatch = filterVal === '5' && row.dataset.result === 'FALLO';
-      const otherMatch = filterVal !== '0' && filterVal !== '1' && filterVal !== '5' && row.dataset.type === filterSelect.options[parseInt(filterVal)].textContent;
-      row.style.display = (typeMatch || resultMatch || otherMatch) ? '' : 'none';
+      row.style.display = row.dataset.source === filterVal ? '' : 'none';
     });
   }
 }
@@ -169,6 +177,5 @@ function handleA1Pick(screen, optionEls, index) {
     correct ? PHASE3.activity1.feedback.correct : PHASE3.activity1.feedback.incorrect;
   screen._a1FeedbackEl.className = 'p3-feedback';
   screen._a1FeedbackEl.style.color = correct ? 'var(--p3-blue)' : 'var(--alert-red)';
-  screen._a1FeedbackEl.dataset.summary = 'a1:' + formatScore(score);
   screen._a1NextEl.style.display = 'inline-block';
 }
