@@ -89,19 +89,23 @@ Dividida en 3 actividades:
 
 **Reporte inicial:** Muestra estadísticas del incidente (50 recuperados, 20 modificados, 5 eliminados, 75 total).
 
-**Actividad 1 — Archivos recuperados (4 puntos):**
-- Pregunta de opción múntiple (4 opciones, se muestran aleatoriamente)
-- correctIndex=0: "Verificar la integridad y el estado de los archivos recuperados"
+**Actividad 1 — Análisis de eventos (4 puntos):**
+- Visor de Eventos del Sistema con 3 preguntas de opción múltiple
+- El jugador analiza logs de Windows (Event ID, niveles, orígenes)
+- Busca actividades sospechosas: IPs externas, accesos fallidos, descargas de `.exe`
+- correctIndex=1 para la pregunta principal
+- correctIndex=1 para la pregunta de evidencia
 
-**Actividad 2 — Archivos modificados (14 puntos):**
-- Explorador de archivos con 50 archivos (20 corruptos + 30 normales)
-- El jugador revisa y elimina los que parezcan alterados
-- +1 por correcta, -0.5 por incorrecta, clamp [0, 14]
-- Popup de resumen al finalizar
+**Actividad 2 — Verificación de integridad (14 puntos):**
+- Explorador de archivos con 25 archivos (10 modificados por SHA-256 + 15 válidos)
+- Temporizador de 10:00 minutos
+- El jugador selecciona archivos sospechosos y verifica hashes SHA-256
+- Popup de resumen al finalizar con puntuación: `(correctos) - (0.5 * falsos positivos)`, clamp [0, 14]
+- Timeout = 0 puntos
 
-**Actividad 3 — Archivos eliminados (2 puntos):**
-- 5 archivos eliminados, 180 segundos de temporizador
-- Situación: "El ataque comenzó hace 6 minutos"
+**Actividad 3 — Recuperación de archivos (2 puntos):**
+- Sin temporizador
+- Situación: recuperar 5 archivos borrados de 3 fuentes de respaldo (C:, D:, USB)
 - 5 opciones de método de recuperación
 - correctIndex=2: "Utilizar la copia de seguridad de las 12:00 a.m. de anoche"
 

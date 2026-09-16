@@ -4,9 +4,16 @@ import { State } from '../../../core/state.js';
 import { UIManager } from '../../../ui/uiManager.js';
 import { PHASE3, clampActivity2, formatScore } from './phase3Data.js';
 
+const A2_TIMER_SECONDS = 600; // 10:00 minutes
+
 export function renderActivity2(screen) {
   if (!screen._alive) return;
   screen._setP3({ currentActivity: 'activity2' });
+
+  // Reset timer
+  screen._a2SecondsLeft = A2_TIMER_SECONDS;
+  screen._a2TimerRunning = false;
+  startA2Timer(screen);
 
   const windowEl = document.createElement('div');
   windowEl.className = 'p3-explorer';
@@ -14,7 +21,7 @@ export function renderActivity2(screen) {
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
   titlebar.innerHTML =
-    '<span>ACTIVIDAD 2 DE 3 \u00b7 ARCHIVOS MODIFICADOS</span>' +
+    '<span>ACTIVIDAD 2 DE 3 \u00b7 VERIFICACIÓN DE INTEGRIDAD</span>' +
     '<div class="p3-dots"><span></span><span></span><span></span></div>';
   windowEl.appendChild(titlebar);
 
@@ -22,28 +29,21 @@ export function renderActivity2(screen) {
   toolbar.className = 'p3-exp-toolbar';
   const tag = document.createElement('span');
   tag.className = 'p3-exp-tag';
-  tag.textContent = '\u00c1bre los archivos y verifica su contenido antes de eliminar los que parezcan alterados.';
+  tag.textContent = 'Verifica el hash de cada archivo. Selecciona los que tengan hash modificado para eliminar.';
+  const timerDisplay = document.createElement('span');
+  timerDisplay.className = 'p3-a2-timer-display';
+  timerDisplay.dataset.timer = 'a2';
+  timerDisplay.textContent = formatTime(A2_TIMER_SECONDS);
   const counts = document.createElement('span');
   counts.className = 'p3-exp-counts';
   counts.dataset.counts = 'a2';
   toolbar.appendChild(tag);
+  toolbar.appendChild(timerDisplay);
   toolbar.appendChild(counts);
   windowEl.appendChild(toolbar);
 
   const body = document.createElement('div');
   body.className = 'p3-exp-body';
-
-  const nav = document.createElement('nav');
-  nav.className = 'p3-exp-nav';
-  const grp = (label, count) => {
-    const n = document.createElement('div');
-    n.className = 'p3-nav-item';
-    n.innerHTML = `<span class="p3-nav-arrow">\u25B8</span><span>${label}</span><span class="p3-nav-count">${count}</span>`;
-    return n;
-  };
-  nav.appendChild(grp('Documentos recuperados', PHASE3.activity2.total));
-  nav.appendChild(grp('Archivos eliminados', PHASE3.deleted));
-  body.appendChild(nav);
 
   const main = document.createElement('div');
   main.className = 'p3-exp-main';
@@ -67,7 +67,7 @@ export function renderActivity2(screen) {
   feedback.dataset.feedback = 'a2';
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'btn btn--alert';
-  deleteBtn.textContent = 'BORRAR';
+  deleteBtn.textContent = 'BORRAR SELECCIONADOS';
   deleteBtn.dataset.action = 'delete';
   const finishBtn = document.createElement('button');
   finishBtn.className = 'btn btn--primary';
@@ -87,15 +87,62 @@ export function renderActivity2(screen) {
 
   screen._a2ListEl = listEl;
   screen._a2CountsEl = counts;
+  screen._a2TimerDisplay = timerDisplay;
   screen._a2AsideEl = aside;
   screen._a2FeedbackEl = feedback;
-  screen._a2ExitRefs = {};
 
   deleteBtn.addEventListener('click', () => handleDelete(screen));
   finishBtn.addEventListener('click', () => handleFinish(screen));
 
   renderFileList(screen);
   updateA2Summary(screen);
+}
+
+function startA2Timer(screen) {
+  if (screen._a2TimerRunning) return;
+  screen._a2TimerRunning = true;
+
+  if (screen._a2IntervalId) {
+    clearInterval(screen._a2IntervalId);
+    screen._a2IntervalId = null;
+  }
+
+  screen._a2IntervalId = setInterval(() => {
+    if (!screen._alive) {
+      stopA2Timer(screen);
+      return;
+    }
+    screen._a2SecondsLeft -= 1;
+    const remaining = Math.max(0, screen._a2SecondsLeft);
+    screen._setP3({ activity2TimeLeft: remaining });
+    screen._a2TimerDisplay.textContent = formatTime(remaining);
+
+    if (remaining <= 60) {
+      screen._a2TimerDisplay.classList.add('critical');
+    } else if (remaining <= 120) {
+      screen._a2TimerDisplay.classList.add('low');
+    }
+
+    if (remaining <= 0) {
+      stopA2Timer(screen);
+      handleTimeout(screen);
+    }
+  }, 1000);
+}
+
+function stopA2Timer(screen) {
+  screen._a2TimerRunning = false;
+  if (screen._a2IntervalId) {
+    clearInterval(screen._a2IntervalId);
+    screen._a2IntervalId = null;
+  }
+}
+
+function formatTime(totalSeconds) {
+  const s = Math.max(0, totalSeconds);
+  const mm = String(Math.floor(s / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
 }
 
 function fileRow(screen, f) {
@@ -106,7 +153,6 @@ function fileRow(screen, f) {
   const check = document.createElement('input');
   check.type = 'checkbox';
   check.className = 'p3-file-check';
-  check.dataset.file = String(f.id);
   check.checked = !!f.isSelected;
   check.disabled = !!f.isDeleted;
   check.setAttribute('aria-label', 'Marcar ' + f.name);
@@ -120,7 +166,7 @@ function fileRow(screen, f) {
   row.appendChild(check);
 
   const icon = document.createElement('span');
-  icon.className = 'p3-file-icon' + (f.isDeleted ? ' dim' : '');
+  icon.className = 'p3-file-icon' + (f.isDeleted ? ' dim' : '') + (f.isModified ? ' modified' : '');
   icon.textContent = f.type.slice(0, 3);
   row.appendChild(icon);
 
@@ -135,23 +181,26 @@ function fileRow(screen, f) {
   type.textContent = f.type;
   row.appendChild(type);
 
-  const status = document.createElement('span');
-  status.className = 'p3-file-status';
+  const hashStatus = document.createElement('span');
+  hashStatus.className = 'p3-file-hash-status';
   if (f.isDeleted) {
-    status.textContent = '\u00D7 ELIMINADO';
-    status.classList.add('is-danger');
+    hashStatus.textContent = '\u00D7 ELIMINADO';
+    hashStatus.classList.add('is-danger');
+  } else if (f.isModified) {
+    hashStatus.textContent = '\u26A0 HASH MODIFICADO';
+    hashStatus.classList.add('is-warning');
   } else {
-    status.textContent = '\u2713 RECUPERADO';
-    status.classList.add('is-ok');
+    hashStatus.textContent = '\u2713 HASH V\u00C1LIDO';
+    hashStatus.classList.add('is-ok');
   }
-  row.appendChild(status);
+  row.appendChild(hashStatus);
 
   const openBtn = document.createElement('button');
   openBtn.className = 'btn btn--small';
-  openBtn.textContent = 'ABRIR';
+  openBtn.textContent = 'VERIFICAR HASH';
   openBtn.dataset.open = String(f.id);
   openBtn.disabled = !!f.isDeleted;
-  openBtn.addEventListener('click', () => openFile(screen, f));
+  openBtn.addEventListener('click', () => verifyHash(screen, f));
   row.appendChild(openBtn);
 
   return row;
@@ -163,9 +212,11 @@ function renderFileList(screen) {
   st.files.forEach((f) => screen._a2ListEl.appendChild(fileRow(screen, f)));
 }
 
-function openFile(screen, f) {
+function verifyHash(screen, f) {
   if (f.isDeleted) return;
   AudioManager.playSFX(AUDIO_SFX.POPUP);
+
+  // Mark as verified
   if (!f.isVerified) {
     f.isVerified = true;
     screen._setP3({ files: State.get('phase3State').files });
@@ -174,22 +225,47 @@ function openFile(screen, f) {
   }
 
   const content = document.createElement('div');
-  content.className = 'p3-file-popup';
-  const meta = document.createElement('div');
-  meta.className = 'p3-file-popup-meta';
-  meta.innerHTML = `<span>Nombre: ${f.name}</span><span>Tipo: ${f.type}</span><span>Estado: recuperado</span>`;
-  const pre = document.createElement('pre');
-  pre.className = 'file-content';
-  pre.textContent = f.content;
+  content.className = 'p3-hash-popup';
+
+  const header = document.createElement('div');
+  header.className = 'p3-hash-popup-header';
+  header.textContent = 'VERIFICACIÓN DE HASH — ' + f.name;
+  content.appendChild(header);
+
+  const hashTable = document.createElement('table');
+  hashTable.className = 'p3-hash-table';
+  const thead = document.createElement('thead');
+  thead.innerHTML = '<tr><th>Tipo de Hash</th><th>Valor SHA-256</th></tr>';
+  hashTable.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  const expRow = document.createElement('tr');
+  expRow.innerHTML = '<td><strong>Hash Esperado</strong></td><td class="p3-hash-value">' + f.expectedHash + '</td>';
+  const currRow = document.createElement('tr');
+  currRow.className = f.isModified ? 'hash-mismatch' : 'hash-match';
+  currRow.innerHTML = '<td><strong>Hash Actual (Actual)</strong></td><td class="p3-hash-value">' + f.currentHash + '</td>';
+  tbody.appendChild(expRow);
+  tbody.appendChild(currRow);
+  hashTable.appendChild(tbody);
+  content.appendChild(hashTable);
+
+  const matchIndicator = document.createElement('div');
+  matchIndicator.className = 'p3-hash-match-indicator';
+  if (f.isModified) {
+    matchIndicator.classList.add('mismatch');
+    matchIndicator.textContent = '\u26A0 ALERTA: El hash actual NO coincide con el esperado. El archivo puede haber sido alterado.';
+  } else {
+    matchIndicator.classList.add('match');
+    matchIndicator.textContent = '\u2713 OK: Los hashes coinciden. El archivo es íntegro.';
+  }
+  content.appendChild(matchIndicator);
+
   const hint = document.createElement('p');
-  hint.className = 'p3-file-popup-hint';
-  hint.textContent = 'Verifica el contenido antes de tomar una decisi\u00f3n.';
-  content.appendChild(meta);
-  content.appendChild(pre);
+  hint.className = 'p3-hash-popup-hint';
+  hint.textContent = 'Decide si el archivo es sospechoso y selecciónalo para eliminarlo.';
   content.appendChild(hint);
 
   UIManager.createPopup({
-    title: 'ABRIR: ' + f.name,
+    title: 'HASH: ' + f.name,
     content,
     buttonText: 'CERRAR',
     onClose: () => AudioManager.playSFX(AUDIO_SFX.CLICK),
@@ -215,7 +291,7 @@ function handleDelete(screen) {
   selected.forEach((f) => {
     f.isDeleted = true;
     f.isSelected = false;
-    if (f.isCorrupted) {
+    if (f.isModified) {
       correct += 1;
       raw += PHASE3.activity2.perCorrect;
     } else {
@@ -251,7 +327,7 @@ function updateA2Summary(screen) {
   const st = State.get('phase3State');
   const reviewed = st.files.filter((f) => f.isVerified).length;
   const deleted = st.files.filter((f) => f.isDeleted).length;
-  const correctFound = st.files.filter((f) => f.isDeleted && f.isCorrupted).length;
+  const correctFound = st.files.filter((f) => f.isDeleted && f.isModified).length;
 
   screen._a2CountsEl.textContent =
     `Mostrando ${st.files.length} archivos \u00b7 Revisados: ${reviewed} \u00b7 Eliminados: ${deleted}`;
@@ -260,14 +336,14 @@ function updateA2Summary(screen) {
   aside.innerHTML = '';
   const h = document.createElement('h4');
   h.className = 'p3-check-title';
-  h.textContent = 'CHECKLIST DE VERIFICACI\u00d3N';
+  h.textContent = 'CHECKLIST DE INTEGRIDAD';
   aside.appendChild(h);
 
   const rows = [
-    { label: 'Archivos revisados', value: `${reviewed} / ${st.files.length}` },
-    { label: 'Archivos corruptos encontrados', value: `${correctFound} / ${PHASE3.activity2.targetFiles}` },
-    { label: 'Comprobar coherencia del contenido', value: 'criterio' },
-    { label: 'Reportar solo archivos con anomal\u00edas', value: 'criterio' },
+    { label: 'Archivos verificados', value: `${reviewed} / ${st.files.length}` },
+    { label: 'Archivos modificados encontrados', value: `${correctFound} / ${PHASE3.activity2.targetFiles}` },
+    { label: 'Comparar hash esperado vs actual', value: 'criterio' },
+    { label: 'Seleccionar solo archivos con hash alterado', value: 'criterio' },
   ];
   rows.forEach((r) => {
     const li = document.createElement('div');
@@ -290,13 +366,14 @@ function updateA2Summary(screen) {
 
 function handleFinish(screen) {
   const st = State.get('phase3State');
+  stopA2Timer(screen);
   AudioManager.playSFX(AUDIO_SFX.SUCCESS);
 
   const content = document.createElement('div');
   content.className = 'p3-summary-popup';
   const lines = [
     ['VERIFICACI\u00d3N FINALIZADA', 'heading'],
-    ['Archivos eliminados', String(st.files.filter((f) => f.isDeleted).length)],
+    ['Archivos verificados', String(st.files.filter((f) => f.isDeleted).length)],
     ['Archivos correctamente identificados', String(st.correctDeletions)],
     ['Archivos eliminados incorrectamente', String(st.incorrectDeletions)],
     ['Puntaje de la actividad', `${formatScore(st.activity2Score)} / ${PHASE3.activity2.maxScore}`],
@@ -326,4 +403,46 @@ function handleFinish(screen) {
     buttonText: 'CONTINUAR',
     onClose: () => screen._buildActivity3(),
   });
+}
+
+function handleTimeout(screen) {
+  stopA2Timer(screen);
+  const st = State.get('phase3State');
+  const selected = st.files.filter((f) => f.isSelected && !f.isDeleted);
+
+  let raw = st.activity2Raw;
+  let correct = st.correctDeletions;
+  let incorrect = st.incorrectDeletions;
+
+  selected.forEach((f) => {
+    f.isDeleted = true;
+    f.isSelected = false;
+    if (f.isModified) {
+      correct += 1;
+      raw += PHASE3.activity2.perCorrect;
+    } else {
+      incorrect += 1;
+      raw -= PHASE3.activity2.perWrong;
+    }
+  });
+
+  const score = clampActivity2(raw);
+  screen._setP3({
+    activity2Raw: raw,
+    activity2Score: score,
+    correctDeletions: correct,
+    incorrectDeletions: incorrect,
+    deletedByUser: st.files.filter((f) => f.isDeleted).map((f) => f.id),
+    files: st.files,
+    activity2TimeLeft: 0,
+  });
+
+  screen._a2FeedbackEl.textContent = 'TIEMPO AGOTADO. Se procesaron los archivos seleccionados.';
+  screen._a2FeedbackEl.className = 'p3-exp-feedback';
+  screen._a2FeedbackEl.style.color = 'var(--alert-red)';
+
+  renderFileList(screen);
+  updateA2Summary(screen);
+
+  setTimeout(() => handleFinish(screen), 1500);
 }

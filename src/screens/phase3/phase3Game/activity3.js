@@ -1,6 +1,5 @@
 import { AUDIO_SFX } from '../../../core/constants.js';
 import { AudioManager } from '../../../audio/audioManager.js';
-import { State } from '../../../core/state.js';
 import { PHASE3, scoreActivity3, formatScore } from './phase3Data.js';
 
 export function renderActivity3(screen) {
@@ -23,14 +22,8 @@ export function renderActivity3(screen) {
 
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
-  titlebar.innerHTML = '<span>ACTIVIDAD 3 DE 3 \u00b7 ARCHIVOS ELIMINADOS</span>';
+  titlebar.innerHTML = '<span>ACTIVIDAD 3 DE 3 \u00b7 RECUPERACIÓN DE ARCHIVOS</span>';
   windowEl.appendChild(titlebar);
-
-  const timerEl = document.createElement('div');
-  timerEl.className = 'p3-a3-timer';
-  timerEl.dataset.timer = 'a3';
-  timerEl.textContent = '03:00';
-  windowEl.appendChild(timerEl);
 
   const situation = document.createElement('div');
   situation.className = 'p3-a3-situation';
@@ -42,8 +35,8 @@ export function renderActivity3(screen) {
   situation.appendChild(p);
   windowEl.appendChild(situation);
 
-  const grid = document.createElement('div');
-  grid.className = 'p3-a3-files';
+  const filesInfo = document.createElement('div');
+  filesInfo.className = 'p3-a3-files';
   PHASE3.activity3.files.forEach((name) => {
     const chip = document.createElement('div');
     chip.className = 'p3-a3-filechip';
@@ -55,9 +48,14 @@ export function renderActivity3(screen) {
     n.textContent = name;
     chip.appendChild(icon);
     chip.appendChild(n);
-    grid.appendChild(chip);
+    filesInfo.appendChild(chip);
   });
-  windowEl.appendChild(grid);
+  windowEl.appendChild(filesInfo);
+
+  const hint = document.createElement('div');
+  hint.className = 'p3-a3-hint';
+  hint.innerHTML = '<strong>Pista:</strong> Revisa los registros de eventos. Las copias creadas DURANTE el incidente podrían estar comprometidas. La copia más reciente no siempre es la mejor opción.';
+  windowEl.appendChild(hint);
 
   const optionsEl = document.createElement('div');
   optionsEl.className = 'p3-a3-options';
@@ -96,54 +94,9 @@ export function renderActivity3(screen) {
   wrap.appendChild(windowEl);
   screen.rootEl.appendChild(wrap);
 
-  screen._a3TimerEl = timerEl;
   screen._a3OptionEls = optionEls;
   screen._a3FeedbackEl = feedback;
   screen._a3NextEl = nextBtn;
-
-  screen._a3SecondsLeft = PHASE3.activity3.timerSeconds;
-  updateTimerDisplay(screen);
-
-  screen._intervalId = setInterval(() => tickTimer(screen), 1000);
-}
-
-function tickTimer(screen) {
-  if (!screen._alive) {
-    if (screen._intervalId) clearInterval(screen._intervalId);
-    screen._intervalId = null;
-    return;
-  }
-  screen._a3SecondsLeft -= 1;
-  screen._setP3({ activity3TimeLeft: Math.max(0, screen._a3SecondsLeft) });
-  updateTimerDisplay(screen);
-
-  if (screen._a3Answered) {
-    if (screen._a3SecondsLeft <= 0) {
-      if (screen._intervalId) clearInterval(screen._intervalId);
-      screen._intervalId = null;
-    }
-    return;
-  }
-
-  if (screen._a3SecondsLeft <= 10) {
-    AudioManager.playSFX(AUDIO_SFX.TICK);
-    screen._a3TimerEl.classList.add('critical');
-  } else if (screen._a3SecondsLeft <= 30) {
-    screen._a3TimerEl.classList.add('low');
-  }
-
-  if (screen._a3SecondsLeft <= 0) {
-    if (screen._intervalId) clearInterval(screen._intervalId);
-    screen._intervalId = null;
-    handleTimeout(screen);
-  }
-}
-
-function updateTimerDisplay(screen) {
-  const s = Math.max(0, screen._a3SecondsLeft);
-  const mm = String(Math.floor(s / 60)).padStart(2, '0');
-  const ss = String(s % 60).padStart(2, '0');
-  screen._a3TimerEl.textContent = `${mm}:${ss}`;
 }
 
 function handleA3Pick(screen, optionEls, index) {
@@ -175,19 +128,5 @@ function handleA3Pick(screen, optionEls, index) {
     screen._a3FeedbackEl.className = 'p3-feedback';
     screen._a3FeedbackEl.style.color = 'var(--alert-yellow)';
   }
-  screen._a3NextEl.style.display = 'inline-block';
-}
-
-function handleTimeout(screen) {
-  const decision = PHASE3.activity3.options[PHASE3.activity3.options.length - 1];
-  screen._setP3({ activity3Decision: decision, activity3Score: 0 });
-  screen._a3OptionEls.forEach((o) => { o.disabled = true; });
-  screen._a3TimerEl.classList.add('critical');
-  AudioManager.playSFX(AUDIO_SFX.ALERT);
-  screen._a3FeedbackEl.textContent =
-    'TIEMPO AGOTADO. Se registr\u00f3: ' + decision + '.';
-  screen._a3FeedbackEl.className = 'p3-feedback';
-  screen._a3FeedbackEl.style.color = 'var(--alert-red)';
-  screen._setP3({ activity3TimeLeft: 0 });
   screen._a3NextEl.style.display = 'inline-block';
 }

@@ -66,44 +66,42 @@ function extFor(idx) {
   return cycle[idx % cycle.length];
 }
 
-function fileId(idx) {
-  return idx + 1;
+// Deterministic SHA-256-like hex generator (simulated hashes for offline use)
+function sha256Sim(str) {
+  let hash = '';
+  let val = 0;
+  for (let i = 0; i < str.length; i++) {
+    val = ((val << 5) - val + str.charCodeAt(i)) | 0;
+  }
+  val = Math.abs(val) >>> 0;
+  // Generate 64-char hex
+  for (let i = 0; i < 64; i++) {
+    val = (val * 1103515245 + 12345) & 0x7fffffff;
+    hash += val.toString(16).slice(-2);
+    if (hash.length >= 64) break;
+  }
+  return hash.padEnd(64, 'a');
 }
 
-const CORRUPTED_POOL = [
-  // Contenido abiertamente anómalo
-  'ERROR_0x4488\nfile_integrity_corrupted\n### SYSTEM_OVERRIDE ###\nIntento de sobrescritura detectado.',
-  'DATA RECOVERY FAILURE\n000011101010001111010111\nEl bloque no puede ser leído.',
-  'NULL_NULL_NULL\nACCESS_REWRITE\nSEGMENT NOT FOUND\nReintento fallido (3/3).',
-  '%%%%% CORRUPTED %%%%%\n[REDACTED BY UNKNOWN PROCESS]\nmetadata: sin valor',
-  '0xDEADBEEF 0xBADBEEF\nMETA_STRIPPED\nchecksum: FAIL\nIntegridad comprometida.',
-  '{"status":"failed","integrity":"breached","checksum":"0xBAD"}\nSin coincidencia con el original.',
-  '...\n...\n...\n[END OF TRANSMISSION]',
-  'REWRITE COMPLETE\noriginal_data_lost\nsession flag: 0x0F\nNo se pudo restaurar el contenido.',
-  'CONEXIÓN PERDIDA\npaquete 0x0C sin confirmación\nbuffer sobrescrito con basura',
-  'AAA...AAAC:\nEl archivo fue modificado mientras se leía. Verificación imposible.',
-  // Contenido casi normal, con una anomalía sutil
-  'Informe de avance del proyecto.\nEl sistema está operando dentro de lo esperado durante la jornada.\nNota: se detectó lectura inesperada en la sección de memoria compartida.\nFirma del responsable: OK',
-  'Resumen semanal de actividades.\nSe completaron las tareas programadas durante la semana.\nSe agrega una tarea adicional no solicitada al final del documento.\nFin del informe.',
-  'Lista de participantes del taller.\nAsistentes confirmados: 24 personas.\nEl archivo intenta conectarse a un servidor externo al abrirse.\nDocumento generado automáticamente.',
-  'Programación de la semana de clases.\nLunes: revisión. Martes: práctica. Miércoles: clase.\nSe solicita recopilar todas las credenciales de los usuarios (REVISAR).\nViernes: entrega de laboratorio.',
-  'Configuración del equipo de laboratorio.\nCPU: i5, RAM: 8GB, Disco: 512GB.\nOtros programas se cierran inesperadamente mientras se desactiva el antivirus.\nEl equipo se reinicia cada 30 minutos.',
-  'Guía de estudio del curso.\nTema: redes y comunicaciones seguras.\nAl final se incluye un fragmento cifrado que no corresponde al documento.\nDuración sugerida: 40 minutos.',
-  'Registro de notas del primer bimestre.\nSe registraron 12 evaluaciones completas.\nLas calificaciones de la última columna fueron sustituidas por valores aleatorios.\nDocumento marcado como definitivo.',
-  'Acta de reunión del comité.\nAsistentes: 9 personas. Acuerdos: 3.\nSe anexó un bloque de datos nunca mencionado en la sala de reuniones.\nFin del acta.',
-  'Horario de exámenes finales.\nTurno mañana y turno tarde confirmados.\nLa fecha del examen general fue reemplazada por otra fecha falsa.\nVerificar con secretaría académica.',
-  'Resumen de encuesta de satisfacción.\nRespuestas válidas: 110.\nUna porción de los resultados fue alterada por un proceso de terceros.\nTasa de respuesta: 78%.',
-];
+function padHex(s, len) {
+  return s.slice(0, len).padEnd(len, '0');
+}
 
-const NORMAL_BASES = [
-  'Informe elaborado durante la jornada.\nContenido verificado y coherente con el registro oficial.\nDocumento generado correctamente.',
-  'Resumen de actividades completadas.\nDatos validados por el sistema de gestión académica.\nSin observaciones pendientes.',
-  'Registro interno actualizado.\nLa información corresponde al periodo en curso.\nArchivo revisado y aprobado.',
-  'Documento de trabajo del equipo.\nDetalles coherentes con las reuniones recientes.\nVersión final confirmada.',
-  'Reporte de seguimiento.\nLos valores presentados coinciden con los registros.\nActualizado al cierre del día.',
-  'Material de referencia del curso.\nContenido revisado por la biblioteca digital.\nDisponible para consulta.',
-];
+function makeHash(seed) {
+  const h = sha256Sim(String(seed));
+  // Ensure 64-char lowercase hex
+  return padHex(h, 64);
+}
 
+function generateValidHash(name, ext) {
+  return makeHash(`valid_${name}_${ext}`);
+}
+
+function generateModifiedHash(name, ext) {
+  return makeHash(`modified_${name}_${ext}_tampered`);
+}
+
+// Deterministic seeded RNG (mulberry32)
 function mulberry32(seed) {
   let a = seed >>> 0;
   return function () {
@@ -124,31 +122,74 @@ function shuffleWith(rng, arr) {
   return a;
 }
 
-function normalContent(name, template) {
-  return `${template}\n\nArchivo: ${name}`;
-}
+// Normal content bases (valid files)
+const NORMAL_BASES = [
+  'Informe elaborado durante la jornada.\nContenido verificado y coherente con el registro oficial.\nDocumento generado correctamente.',
+  'Resumen de actividades completadas.\nDatos validados por el sistema de gesti\u00f3n acad\u00e9mica.\nSin observaciones pendientes.',
+  'Registro interno actualizado.\nLa informaci\u00f3n corresponde al periodo en curso.\nArchivo revisado y aprobado.',
+  'Documento de trabajo del equipo.\nDetalles coherentes con las reuniones recientes.\nVersi\u00f3n final confirmada.',
+  'Reporte de seguimiento.\nLos valores presentados coinciden con los registros.\nActualizado al cierre del d\u00eda.',
+  'Material de referencia del curso.\nContenido revisado por la biblioteca digital.\nDisponible para consulta.',
+];
+
+// Modified content (altered/tampered files)
+const MODIFIED_BASES = [
+  'ERROR_0x4488\nfile_integrity_corrupted\n### SYSTEM_OVERRIDE ###\nIntento de sobrescritura detectado.',
+  'DATA RECOVERY FAILURE\n000011101010001111010111\nEl bloque no puede ser leído.',
+  'NULL_NULL_NULL\nACCESS_REWRITE\nSEGMENT NOT FOUND\nReintento fallido (3/3).',
+  '%%%%% CORRUPTED %%%%%\n[REDACTED BY UNKNOWN PROCESS]\nmetadata: sin valor',
+  '0xDEADBEEF 0xBADBEEF\nMETA_STRIPPED\nchecksum: FAIL\nIntegridad comprometida.',
+  '{"status":"failed","integrity":"breached","checksum":"0xBAD"}\nSin coincidencia con el original.',
+  '...\n...\n...\n[END OF TRANSMISSION]',
+  'REWRITE COMPLETE\noriginal_data_lost\nsession flag: 0x0F\nNo se pudo restaurar el contenido.',
+  'CONEXIÓN PERDIDA\npaquete 0x0C sin confirmación\nbuffer sobrescrito con basura',
+  'AAA...AAAC:\nEl archivo fue modificado mientras se leía. Verificación imposible.',
+  'Informe de avance del proyecto.\nEl sistema está operando dentro de lo esperado durante la jornada.\nNota: se detectó lectura inesperada en la sección de memoria compartida.\nFirma del responsable: OK',
+  'Resumen semanal de actividades.\nSe completaron las tareas programadas durante la semana.\nSe agrega una tarea adicional no solicitada al final del documento.\nFin del informe.',
+  'Lista de participantes del taller.\nAsistentes confirmados: 24 personas.\nEl archivo intenta conectarse a un servidor externo al abrirse.\nDocumento generado automáticamente.',
+  'Programación de la semana de clases.\nLunes: revisión. Martes: práctica. Miércoles: clase.\nSe solicita recopilar todas las credenciales de los usuarios (REVISAR).\nViernes: entrega de laboratorio.',
+  'Configuración del equipo de laboratorio.\nCPU: i5, RAM: 8GB, Disco: 512GB.\nOtros programas se cierran inesperadamente mientras se desactiva el antivirus.\nEl equipo se reinicia cada 30 minutos.',
+  'Guía de estudio del curso.\nTema: redes y comunicaciones seguras.\nAl final se incluye un fragmento cifrado que no corresponde al documento.\nDuración sugerida: 40 minutos.',
+  'Registro de notas del primer bimestre.\nSe registraron 12 evaluaciones completas.\nLas calificaciones de la última columna fueron sustituidas por valores aleatorios.\nDocumento marcado como definitivo.',
+  'Acta de reunión del comité.\nAsistentes: 9 personas. Acuerdos: 3.\nSe anexó un bloque de datos nunca mencionado en la sala de reuniones.\nFin del acta.',
+  'Horario de exámenes finales.\nTurno mañana y turno tarde confirmados.\nLa fecha del examen general fue reemplazada por otra fecha falsa.\nVerificar con secretaría académica.',
+  'Resumen de encuesta de satisfacción.\nRespuestas válidas: 110.\nUna porción de los resultados fue alterada por un proceso de terceros.\nTasa de respuesta: 78%.',
+];
 
 export function generateFiles(seed = 20260908) {
   const rng = mulberry32(seed);
-  const order = shuffleWith(rng, BASE_NAMES.map((_, i) => i));
-  const corruptedSet = new Set(order.slice(0, 20));
-  const pool = shuffleWith(rng, CORRUPTED_POOL);
-  let corruptCount = 0;
 
-  return BASE_NAMES.map((base, i) => {
-    const idx = fileId(i);
+  // Select exactly 10 out of 25 files to be "modified" (SHA-256 mismatch)
+  const indices = Array.from({ length: 25 }, (_, i) => i);
+  const shuffled = shuffleWith(rng, indices);
+  const modifiedIndices = new Set(shuffled.slice(0, 10));
+
+  const pool = shuffleWith(rng, MODIFIED_BASES);
+  let poolIdx = 0;
+
+  return BASE_NAMES.slice(0, 25).map((base, i) => {
+    const idx = i + 1;
     const ext = extFor(i);
-    const isCorrupted = corruptedSet.has(i);
     const name = `${base}.${ext}`;
-    const content = isCorrupted
-      ? pool[corruptCount++ % pool.length]
-      : normalContent(name, NORMAL_BASES[i % NORMAL_BASES.length]);
+    const isModified = modifiedIndices.has(i);
+
+    const expectedHash = generateValidHash(base, ext);
+    const currentHash = isModified
+      ? generateModifiedHash(base, ext)
+      : expectedHash;
+
+    const content = isModified
+      ? pool[poolIdx++ % pool.length]
+      : `${NORMAL_BASES[i % NORMAL_BASES.length]}\n\nArchivo: ${name}`;
+
     return {
       id: idx,
       name,
       type: ext.toUpperCase(),
       content,
-      isCorrupted,
+      expectedHash,
+      currentHash,
+      isModified,
       isSelected: false,
       isDeleted: false,
       isVerified: false,

@@ -45,7 +45,6 @@ export const phase3GameScreen = {
       correctDeletions: 0,
       incorrectDeletions: 0,
       activity3Decision: null,
-      activity3TimeLeft: PHASE3.activity3.timerSeconds,
       completed: false,
     });
     AudioManager.playMusic('phase3');

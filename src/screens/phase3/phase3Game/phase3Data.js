@@ -5,40 +5,62 @@ export const PHASE3 = {
   deleted: 5,
 
   activity1: {
-    title: 'ARCHIVOS RECUPERADOS',
+    title: 'REGISTROS DE EVENTOS',
     points: 4,
     question:
-      'Después de recuperar correctamente los archivos, ¿qué acción es más importante antes de considerar que el sistema está completamente seguro?',
+      'Al analizar los registros del Visor de Eventos, encuentras un "Inicio de sesión" de tipo ÉXITO con una IP de origen externa no reconocida. ¿Qué interpretación es la más adecuada?',
     options: [
-      'Verificar la integridad y el estado de los archivos recuperados antes de utilizarlos nuevamente.',
-      'Abrir inmediatamente todos los archivos recuperados para comprobar que funcionan.',
-      'Eliminar cualquier archivo que haya sido recuperado recientemente.',
-      'Desactivar las medidas de seguridad para evitar que la recuperación vuelva a modificarlos.',
+      'Se trata de un inicio de sesión legítimo de un usuario externo autorizado; no se requiere acción adicional.',
+      'Es una evidencia que sugiere posible acceso no autorizado y debe investigarse para confirmar si se trata de un compromiso de credenciales.',
+      'El registro no es relevante porque indica "ÉXITO", por lo que el acceso fue autorizado.',
+      'El sistema generó un registro incorrecto y debe eliminarse para evitar confusiones en el análisis.',
     ],
-    correctIndex: 0,
+    correctIndex: 1,
     feedback: {
       correct:
-        'Correcto. Recuperar información no garantiza que esté íntegra; es indispensable verificar la integridad y el estado antes de volver a usarla.',
+        'Correcto. Un inicio de sesión con IP externa no reconocida es una pista que requiere investigación para determinar si se trata de un acceso legítimo o un compromiso de credenciales.',
       incorrect:
-        'Recuerda: recuperar información no confirma que sea correcta. Antes de reutilizarla debes verificar su integridad y su estado.',
+        'Recuerda: un registro de "ÉXITO" con IP desconocida es una pista que debe investigarse, no un dato que confirme autorización ni un error del sistema.',
     },
   },
 
+  activity1Events: [
+    { id: 1, user: 'Admin_Sistema', time: '2026-09-15 08:01:12', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 2, user: 'Admin_Sistema', time: '2026-09-15 08:15:33', type: 'Acceso a archivo', source: '192.168.1.10', result: 'ÉXITO', eventid: 4656 },
+    { id: 3, user: 'Admin_Sistema', time: '2026-09-15 09:22:07', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 4, user: 'Servicio_Avanzado', time: '2026-09-15 10:47:55', type: 'Inicio de sesión', source: '203.0.113.42', result: 'ÉXITO', eventid: 4624 },
+    { id: 5, user: 'Servicio_Avanzado', time: '2026-09-15 10:48:21', type: 'Acceso a archivo', source: '203.0.113.42', result: 'ÉXITO', eventid: 4656 },
+    { id: 6, user: 'Servicio_Avanzado', time: '2026-09-15 10:52:14', type: 'Modificación de registro', source: '203.0.113.42', result: 'ÉXITO', eventid: 4657 },
+    { id: 7, user: 'Admin_Sistema', time: '2026-09-15 11:05:00', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 8, user: 'Invitado_Guest', time: '2026-09-15 11:30:45', type: 'Inicio de sesión', source: '10.0.0.55', result: 'FALLO', eventid: 4625 },
+    { id: 9, user: 'Admin_Sistema', time: '2026-09-15 12:00:00', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 10, user: 'Invitado_Guest', time: '2026-09-15 12:01:10', type: 'Inicio de sesión', source: '10.0.0.55', result: 'FALLO', eventid: 4625 },
+    { id: 11, user: 'Servicio_Avanzado', time: '2026-09-15 12:15:33', type: 'Creación de archivo', source: '203.0.113.42', result: 'ÉXITO', eventid: 4656 },
+    { id: 12, user: 'Admin_Sistema', time: '2026-09-15 12:30:00', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 13, user: 'Servicio_Avanzado', time: '2026-09-15 13:02:48', type: 'Modificación de registro', source: '203.0.113.42', result: 'ÉXITO', eventid: 4657 },
+    { id: 14, user: 'Admin_Sistema', time: '2026-09-15 13:15:22', type: 'Acceso a archivo', source: '192.168.1.10', result: 'ÉXITO', eventid: 4656 },
+    { id: 15, user: 'Invitado_Guest', time: '2026-09-15 13:45:09', type: 'Inicio de sesión', source: '10.0.0.55', result: 'FALLO', eventid: 4625 },
+    { id: 16, user: 'Admin_Sistema', time: '2026-09-15 14:00:00', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 17, user: 'Servicio_Avanzado', time: '2026-09-15 14:22:17', type: 'Acceso a archivo', source: '203.0.113.42', result: 'ÉXITO', eventid: 4656 },
+    { id: 18, user: 'Admin_Sistema', time: '2026-09-15 14:30:00', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+    { id: 19, user: 'Invitado_Guest', time: '2026-09-15 15:10:33', type: 'Inicio de sesión', source: '10.0.0.55', result: 'FALLO', eventid: 4625 },
+    { id: 20, user: 'Admin_Sistema', time: '2026-09-15 15:30:00', type: 'Inicio de sesión', source: '192.168.1.10', result: 'ÉXITO', eventid: 4624 },
+  ],
+
   activity2: {
-    title: 'ARCHIVOS MODIFICADOS',
-    total: 50,
-    targetFiles: 20,
-    corrupted: 20,
-    normal: 30,
+    title: 'VERIFICACIÓN DE INTEGRIDAD',
+    total: 25,
+    targetFiles: 10,
+    corrupted: 10,
+    normal: 15,
     maxScore: 14,
     perCorrect: 1,
     perWrong: 0.5,
   },
 
   activity3: {
-    title: 'ARCHIVOS ELIMINADOS',
+    title: 'RECUPERACIÓN DE ARCHIVOS ELIMINADOS',
     points: 2,
-    timerSeconds: 180,
     files: [
       'ProyectoFinalSeguridad.docx',
       'EvidenciasSeguridad.pdf',
@@ -46,20 +68,19 @@ export const PHASE3 = {
       'TareasSemana3.pdf',
       'ConfiguracionPC.txt',
     ],
-    mandatoryFile: 'ProyectoFinalSeguridad',
     situationHeader: 'ARCHIVOS ELIMINADOS DURANTE EL INCIDENTE',
     situationText:
-      'El ataque comenzó hace aproximadamente 6 minutos. Se perdieron 5 archivos del sistema. Debes decidir qué método de recuperación utilizar para restaurarlos de forma segura.',
+      'Se eliminaron 5 archivos del sistema durante un incidente de seguridad. Dispones de copias de seguridad en múltiples orígenes con diferentes marcas de tiempo. Analiza los registros del incidente antes de elegir.',
     options: [
-      'Recuperar desde Drive',
-      'Recuperar desde USB',
+      'Recuperar desde Drive (copia más reciente: 14:30)',
+      'Recuperar desde USB (copia: 10:15)',
       'Utilizar la copia de seguridad de las 12:00 a. m. de anoche',
-      'Restaurar desde el punto de restauración del sistema',
+      'Restaurar desde el punto de restauración del sistema (copia: 06:00)',
       'Dejar los archivos como están y darlos por perdidos',
     ],
     correctIndex: 2,
     explanation:
-      'La copia de seguridad de las 12:00 a. m. de anoche es la más reciente disponible antes del incidente y permite recuperar la mayor cantidad de información con mínima pérdida de trabajo.',
+      'La copia de seguridad de las 12:00 a. m. de anoche es la más reciente disponible antes del incidente. Las copias más recientes (14:30, 10:15) fueron creadas durante el incidente y podrían estar comprometidas. La copia de las 06:00 es válida pero anterior al trabajo del día.',
   },
 };
 
