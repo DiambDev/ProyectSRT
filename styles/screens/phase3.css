@@ -16,6 +16,7 @@
 }
 
 .p3-activity {
+  position: relative;
   width: 100%;
   animation: fadeIn 0.4s ease forwards;
 }
@@ -24,7 +25,7 @@
 
 .p3-activity::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   background-image:
     linear-gradient(rgba(0, 174, 239, 0.03) 1px, transparent 1px),
@@ -167,9 +168,7 @@
   margin: 0 auto;
   background: var(--p3-surface);
   border: 1px solid var(--p3-border);
-  padding: 0;
   box-shadow: 0 0 30px var(--p3-glow);
-  overflow: hidden;
 }
 
 .p3-activity-1 .p3-stage-chip {
@@ -494,6 +493,7 @@
   border: 1px solid var(--p3-border);
   display: flex;
   flex-direction: column;
+  max-height: 88vh;
   box-shadow: 0 0 30px var(--p3-glow);
 }
 
@@ -596,6 +596,7 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  max-height: 62vh;
   padding: 8px 4px;
 }
 

@@ -5,35 +5,33 @@ import { PHASE3, formatScore } from './phase3Data.js';
 const INCIDENT_TIME = '02:40 a. m.';
 const INCIDENT_MINUTES = 2 * 60 + 40;
 
-const BACKUP_TIMES = {
-  drive: [
-    '02:50 a. m.',
-    '02:45 a. m.',
-    '02:55 a. m.',
-    '02:48 a. m.',
-    '02:42 a. m.',
+const FILE_SOURCES = [
+  [
+    { label: 'Google Drive', time: '02:50 a. m.' },
+    { label: 'USB', time: '00:30 a. m.' },
+    { label: 'Carpeta de respaldo local', time: '03:10 a. m.' },
   ],
-  usb: [
-    '12:00 a. m.',
-    '12:00 a. m.',
-    '12:00 a. m.',
-    '12:00 a. m.',
-    '12:00 a. m.',
+  [
+    { label: 'Disco externo', time: '01:45 a. m.' },
+    { label: 'Google Drive', time: '02:55 a. m.' },
+    { label: 'Copia de red del servidor', time: '03:05 a. m.' },
   ],
-  d: [
-    'No disponible',
-    '01:30 a. m.',
-    'No disponible',
-    '01:45 a. m.',
-    'No disponible',
+  [
+    { label: 'Copia de red del servidor', time: '02:15 a. m.' },
+    { label: 'USB', time: '03:40 a. m.' },
+    { label: 'Google Drive', time: '02:50 a. m.' },
   ],
-};
-
-const BACKUP_LABELS = {
-  drive: 'DRIVE',
-  usb: 'USB',
-  d: 'D:',
-};
+  [
+    { label: 'USB', time: '01:20 a. m.' },
+    { label: 'Disco externo', time: '03:20 a. m.' },
+    { label: 'Historial de archivos', time: '02:50 a. m.' },
+  ],
+  [
+    { label: 'Google Drive', time: '02:10 a. m.' },
+    { label: 'Copia de red del servidor', time: '03:30 a. m.' },
+    { label: 'Disco externo', time: '01:00 a. m.' },
+  ],
+];
 
 function timeToMinutes(timeStr) {
   if (!timeStr || timeStr === 'No disponible') return -1;
@@ -129,17 +127,16 @@ export function renderActivity3(screen) {
     sources.className = 'p3-a3-sources';
 
     const sourceBtns = {};
-    ['drive', 'usb', 'd'].forEach((sourceKey) => {
-      const backupTime = BACKUP_TIMES[sourceKey][i];
+    const fileSources = FILE_SOURCES[i];
+    fileSources.forEach((src, si) => {
       const btn = document.createElement('button');
       btn.className = 'btn btn--small p3-a3-source-btn';
-      btn.textContent = `${BACKUP_LABELS[sourceKey]} \u2014 ${backupTime}`;
-      btn.disabled = backupTime === 'No disponible';
+      btn.textContent = `${src.label} \u2014 ${src.time}`;
       btn.dataset.fileindex = String(i);
-      btn.dataset.source = sourceKey;
-      btn.addEventListener('click', () => selectSource(screen, i, sourceKey, btn));
+      btn.dataset.source = String(si);
+      btn.addEventListener('click', () => selectSource(screen, i, si, btn));
       sources.appendChild(btn);
-      sourceBtns[sourceKey] = btn;
+      sourceBtns[String(si)] = btn;
     });
 
     item.appendChild(sources);
@@ -190,21 +187,21 @@ function fileIconForExt(ext) {
   return icons[ext.toUpperCase()] || 'F';
 }
 
-function selectSource(screen, fileIndex, sourceKey, btn) {
+function selectSource(screen, fileIndex, sourceIndex, btn) {
   if (screen._a3Confirmed[fileIndex]) return;
 
   const item = screen._a3FileItems[fileIndex];
-  const time = BACKUP_TIMES[sourceKey][fileIndex];
+  const src = FILE_SOURCES[fileIndex][sourceIndex];
 
-  screen._a3Selections[fileIndex] = { source: sourceKey, time };
-  item.selectedSource = sourceKey;
+  screen._a3Selections[fileIndex] = { source: sourceIndex, label: src.label, time: src.time };
+  item.selectedSource = sourceIndex;
   item.status.textContent = 'Seleccionado';
   item.status.className = 'p3-a3-filestatus p3-a3-selected';
 
   const allBtns = item.sources.querySelectorAll('.p3-a3-source-btn');
   allBtns.forEach((b) => {
     b.disabled = true;
-    if (b.dataset.source === sourceKey) {
+    if (b.dataset.source === String(sourceIndex)) {
       b.classList.add('source-selected');
     }
   });
@@ -230,7 +227,7 @@ function confirmFile(screen, fileIndex) {
 
   const badge = document.createElement('span');
   badge.className = 'p3-a3-confirmed-badge';
-  badge.textContent = `${BACKUP_LABELS[selection.source]} \u2014 ${selection.time}`;
+  badge.textContent = `${selection.label} \u2014 ${selection.time}`;
   item.item.appendChild(badge);
 
   const allBtns = item.sources.querySelectorAll('.p3-a3-source-btn');
@@ -311,10 +308,9 @@ function evaluateAllFiles(screen) {
 }
 
 function scoreFromCorrectCount(correctCount) {
-  if (correctCount === 0) return 0;
-  if (correctCount === 1) return 0;
-  if (correctCount === 2) return 1;
-  if (correctCount === 3) return 1;
-  if (correctCount === 4) return 2;
+  if (correctCount <= 1) return 0;
+  if (correctCount === 2) return 2;
+  if (correctCount === 3) return 3;
+  if (correctCount === 4) return 4;
   return PHASE3.activity3.points;
 }

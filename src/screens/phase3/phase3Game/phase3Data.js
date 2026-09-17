@@ -53,14 +53,14 @@ export const PHASE3 = {
     targetFiles: 10,
     corrupted: 10,
     normal: 15,
-    maxScore: 14,
+    maxScore: 10,
     perCorrect: 1,
     perWrong: 0.5,
   },
 
   activity3: {
     title: 'RECUPERACIÓN DE ARCHIVOS ELIMINADOS',
-    points: 2,
+    points: 6,
     files: [
       'ProyectoFinalSeguridad.docx',
       'EvidenciasSeguridad.pdf',
