@@ -1,23 +1,42 @@
 /* ============================================================
    FASE 3 · RECUPERACIÓN Y ANÁLISIS DE ARCHIVOS
-   Identidad visual: #00aeef + blanco
+   Identidad visual: #00aeef + blanco · SOC/Investigación
    ============================================================ */
 
 .screen--phase3 {
   background: var(--p3-bg);
   padding: 24px;
+  overflow-y: auto;
 }
 
 .phase3-root {
   width: 100%;
   max-width: 1200px;
-  display: flex;
-  justify-content: center;
+  margin: 0 auto;
 }
 
 .p3-activity {
   width: 100%;
   animation: fadeIn 0.4s ease forwards;
+}
+
+/* ---------- SOC Grid Background ---------- */
+
+.p3-activity::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 174, 239, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 174, 239, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.p3-activity > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- Ventana base ---------- */
@@ -139,21 +158,48 @@
   font-size: 9px;
 }
 
-/* ---------- Actividad 1 · Visor de Eventos ---------- */
+/* ============================================================
+   ACTIVIDAD 1 · EVENT VIEWER / SOC MONITORING
+   ============================================================ */
+
+.p3-activity-1 {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--p3-surface);
+  border: 1px solid var(--p3-border);
+  padding: 0;
+  box-shadow: 0 0 30px var(--p3-glow);
+  overflow: hidden;
+}
+
+.p3-activity-1 .p3-stage-chip {
+  margin: 20px auto 0;
+}
+
+.p3-activity-title {
+  text-align: center;
+  font-size: 16px;
+  letter-spacing: 3px;
+  color: var(--p3-blue-light);
+  margin: 14px 24px 18px;
+  text-transform: uppercase;
+}
+
+/* --- Event Viewer Window --- */
 
 .p3-eventviewer {
   background: var(--p3-bg);
   border: 1px solid var(--p3-border);
-  overflow: hidden;
+  border-left: none;
+  border-right: none;
   display: flex;
   flex-direction: column;
-  max-height: 420px;
-  margin-bottom: 22px;
+  margin-bottom: 0;
 }
 
 .p3-ev-titlebar {
-  height: 28px;
-  padding: 0 12px;
+  height: 30px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -164,6 +210,22 @@
   color: var(--p3-blue-light);
   text-transform: uppercase;
   user-select: none;
+}
+
+.p3-ev-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.p3-ev-title::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--p3-blue);
+  animation: pulse 2s ease infinite;
 }
 
 .p3-ev-dots {
@@ -183,7 +245,7 @@
 .p3-ev-dots span:nth-child(3) { background: var(--p3-blue); }
 
 .p3-ev-toolbar {
-  padding: 8px 12px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -212,10 +274,31 @@
   border-color: var(--p3-blue);
 }
 
+.p3-ev-status {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--p3-blue);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.p3-ev-status::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--p3-blue);
+  animation: pulse 1.5s ease infinite;
+}
+
 .p3-ev-tablewrap {
   flex: 1;
   overflow-y: auto;
-  min-height: 0;
+  min-height: 200px;
+  max-height: 50vh;
 }
 
 .p3-ev-table {
@@ -243,6 +326,7 @@
   text-transform: uppercase;
   text-align: left;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .p3-ev-table td {
@@ -250,6 +334,7 @@
   color: #c0d8ec;
   border-bottom: 1px solid var(--p3-border);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .p3-ev-table tbody tr:hover {
@@ -284,25 +369,27 @@
   background: var(--p3-blue);
 }
 
-/* ---------- Actividad 1 (continued) */
+/* --- A1 Question & Options --- */
 
-.p3-activity-1 {
-  max-width: 780px;
-  margin: 0 auto;
-  background: var(--p3-surface);
-  border: 1px solid var(--p3-border);
-  padding: 28px 26px 30px;
-  box-shadow: 0 0 30px var(--p3-glow);
+.p3-activity-1 .p3-question {
+  padding: 20px 26px 0;
 }
 
-.p3-activity-title {
-  text-align: center;
-  font-size: 16px;
-  letter-spacing: 3px;
-  color: var(--p3-blue-light);
-  margin: 14px 0 18px;
-  text-transform: uppercase;
+.p3-activity-1 .p3-options {
+  padding: 0 26px 20px;
 }
+
+.p3-activity-1 .p3-feedback {
+  padding: 0 26px;
+}
+
+.p3-activity-1 .p3-next {
+  margin: 10px 26px 26px;
+}
+
+/* ============================================================
+   COMMON: Questions & Options
+   ============================================================ */
 
 .p3-question {
   font-size: 14px;
@@ -370,16 +457,47 @@
   margin-top: 10px;
 }
 
-/* ---------- Actividad 2 · Explorador ---------- */
+/* --- Phase 3 Button Overrides --- */
+
+.p3-activity .btn--primary {
+  color: var(--p3-blue-light);
+  border-color: var(--p3-blue);
+  background: rgba(0, 174, 239, 0.08);
+}
+
+.p3-activity .btn--primary:hover {
+  background: rgba(0, 174, 239, 0.18);
+  box-shadow: 0 0 12px var(--p3-glow);
+}
+
+.p3-activity .btn--alert {
+  color: var(--alert-red);
+  border-color: var(--alert-red);
+}
+
+.p3-activity .btn--alert:hover {
+  background: rgba(255, 32, 32, 0.1);
+  box-shadow: 0 0 10px rgba(255, 32, 32, 0.3);
+}
+
+/* ============================================================
+   ACTIVIDAD 2 · FILE INTEGRITY ANALYSIS
+   ============================================================ */
+
+.p3-activity-2 {
+  max-width: 1100px;
+  margin: 0 auto;
+}
 
 .p3-explorer {
   background: var(--p3-surface);
   border: 1px solid var(--p3-border);
   display: flex;
   flex-direction: column;
-  max-height: 88vh;
   box-shadow: 0 0 30px var(--p3-glow);
 }
+
+/* --- A2 Timer --- */
 
 .p3-exp-toolbar {
   display: flex;
@@ -402,6 +520,36 @@
   color: var(--p3-blue);
   white-space: nowrap;
 }
+
+.p3-exp-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--p3-blue);
+  letter-spacing: 1px;
+}
+
+.p3-exp-timer.warning {
+  color: var(--alert-yellow);
+}
+
+.p3-exp-timer.danger {
+  color: var(--alert-red);
+  animation: pulse 1s ease infinite;
+}
+
+.p3-exp-timer::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* --- A2 Body --- */
 
 .p3-exp-body {
   display: flex;
@@ -448,7 +596,6 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  max-height: 62vh;
   padding: 8px 4px;
 }
 
@@ -729,17 +876,16 @@
   color: #fff;
 }
 
-/* ---------- Actividad 3 · Centro de Recuperación ---------- */
+/* ============================================================
+   ACTIVIDAD 3 · RECOVERY CENTER
+   ============================================================ */
 
-.p3-a3-window {
+.p3-activity-3 {
+  max-width: 900px;
+  margin: 0 auto;
   background: var(--p3-surface);
   border: 1px solid var(--p3-border);
-  padding-bottom: 28px;
-  max-width: 860px;
-  margin: 0 auto;
   box-shadow: 0 0 30px var(--p3-glow);
-  display: flex;
-  flex-direction: column;
 }
 
 .p3-a3-context {
@@ -766,6 +912,37 @@
   margin: 0;
 }
 
+/* --- A3 Counter --- */
+
+.p3-a3-counter {
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--p3-border);
+  background: var(--p3-bg);
+}
+
+.p3-a3-counter-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--p3-blue-light);
+  text-transform: uppercase;
+}
+
+.p3-a3-counter-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--p3-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.p3-a3-counter-value.complete {
+  color: var(--p3-blue-light);
+}
+
+/* --- A3 Files List --- */
+
 .p3-a3-fileslist {
   padding: 16px 24px;
 }
@@ -782,11 +959,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--p3-bg);
   border: 1px solid var(--p3-border);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.p3-a3-fileitem.confirmed {
+  border-color: var(--p3-blue-dark);
+  box-shadow: 0 0 10px rgba(0, 174, 239, 0.1);
 }
 
 .p3-a3-filename {
@@ -807,6 +990,14 @@
   font-weight: 600;
 }
 
+.p3-a3-filestatus.p3-a3-confirmed {
+  color: var(--p3-blue-light);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* --- A3 Source Buttons --- */
+
 .p3-a3-sources {
   display: flex;
   gap: 6px;
@@ -814,7 +1005,7 @@
 }
 
 .p3-a3-source-btn {
-  padding: 4px 10px !important;
+  padding: 5px 12px !important;
   font-size: 10px !important;
   letter-spacing: 0.5px !important;
   color: #8aaac4 !important;
@@ -842,6 +1033,77 @@
 .p3-a3-confirm {
   padding: 5px 14px !important;
   font-size: 11px !important;
+  margin-left: 8px;
+}
+
+/* --- A3 Confirmed Badge --- */
+
+.p3-a3-confirmed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(0, 174, 239, 0.12);
+  border: 1px solid var(--p3-blue-dark);
+  color: var(--p3-blue-light);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.p3-a3-confirmed-badge::before {
+  content: '\2713';
+  font-weight: 700;
+}
+
+/* --- A3 Result Section --- */
+
+.p3-a3-result {
+  padding: 20px 24px;
+  border-top: 1px solid var(--p3-border);
+}
+
+.p3-a3-result-heading {
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--p3-blue-light);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.p3-a3-result-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.p3-a3-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--p3-bg);
+  border: 1px solid var(--p3-border);
+  font-size: 12px;
+}
+
+.p3-a3-result-item .filename {
+  color: #e6f0fa;
+}
+
+.p3-a3-result-item .verdict {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.p3-a3-result-item .verdict.correct {
+  color: var(--p3-blue);
+}
+
+.p3-a3-result-item .verdict.incorrect {
+  color: var(--alert-red);
 }
 
 .p3-a3-question-section {
@@ -1165,7 +1427,33 @@
 
 /* ---------- Resultado final (estilos base movidos a achievement.css) ---------- */
 
-/* ---------- Responsive ---------- */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 960px) {
+  .p3-activity-1 {
+    max-width: 100%;
+  }
+
+  .p3-ev-tablewrap {
+    max-height: 40vh;
+  }
+
+  .p3-activity-3 {
+    max-width: 100%;
+  }
+
+  .p3-a3-sources {
+    margin-left: 0;
+    margin-top: 6px;
+  }
+
+  .p3-a3-fileitem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 
 @media (max-width: 860px) {
   .p3-exp-nav { display: none; }
@@ -1179,7 +1467,12 @@
 }
 
 @media (max-width: 640px) {
-  .phase3-root, .p3rec-root { max-width: 100%; }
+  .screen--phase3 { padding: 12px; }
+  .phase3-root { max-width: 100%; }
   .p3-exp-check { display: none; }
   .p3-a3-files { justify-content: flex-start; }
+  .p3-a3-sources { flex-wrap: wrap; }
+  .p3-ev-table { font-size: 11px; }
+  .p3-ev-table th, .p3-ev-table td { padding: 5px 6px; }
+  .p3-a3-counter { flex-direction: column; gap: 6px; text-align: center; }
 }

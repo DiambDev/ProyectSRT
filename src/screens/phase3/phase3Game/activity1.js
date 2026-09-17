@@ -59,6 +59,12 @@ export function renderActivity1(screen) {
   filterSelect.addEventListener('change', () => filterTableRows());
   toolbar.appendChild(filterLabel);
   toolbar.appendChild(filterSelect);
+
+  const statusEl = document.createElement('span');
+  statusEl.className = 'p3-ev-status';
+  statusEl.textContent = 'MONITOREO ACTIVO';
+  toolbar.appendChild(statusEl);
+
   eventWindow.appendChild(toolbar);
 
   // Event table with internal scroll

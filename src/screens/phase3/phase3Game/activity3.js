@@ -1,8 +1,9 @@
 import { AUDIO_SFX } from '../../../core/constants.js';
 import { AudioManager } from '../../../audio/audioManager.js';
-import { PHASE3, scoreActivity3, formatScore } from './phase3Data.js';
+import { PHASE3, formatScore } from './phase3Data.js';
 
 const INCIDENT_TIME = '02:40 a. m.';
+const INCIDENT_MINUTES = 2 * 60 + 40;
 
 const BACKUP_TIMES = {
   drive: [
@@ -34,16 +35,37 @@ const BACKUP_LABELS = {
   d: 'D:',
 };
 
+function timeToMinutes(timeStr) {
+  if (!timeStr || timeStr === 'No disponible') return -1;
+  const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return -1;
+  let mins = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+  if (timeStr.includes('a. m.') && match[1] === '12') mins = 0;
+  if (timeStr.includes('p. m.') && match[1] !== '12') mins += 12 * 60;
+  return mins;
+}
+
 export function renderActivity3(screen) {
   if (!screen._alive) return;
   screen._setP3({ currentActivity: 'activity3' });
-  screen._a3Answered = false;
   screen.rootEl.innerHTML = '';
+
+  screen._a3ConfirmedCount = 0;
+  screen._a3TotalFiles = PHASE3.activity3.files.length;
+  screen._a3Selections = {};
+  screen._a3Confirmed = {};
+  screen._a3FileItems = [];
 
   const wrap = document.createElement('div');
   wrap.className = 'p3-activity p3-activity-3';
 
-  // ========== INCIDENT CONTEXT ==========
+  const titlebar = document.createElement('div');
+  titlebar.className = 'p3-titlebar';
+  titlebar.innerHTML =
+    '<span>ACTIVIDAD 3 DE 3 \u00b7 RECOVERY CENTER</span>' +
+    '<div class="p3-dots"><span></span><span></span><span></span></div>';
+  wrap.appendChild(titlebar);
+
   const context = document.createElement('div');
   context.className = 'p3-a3-context';
 
@@ -54,14 +76,26 @@ export function renderActivity3(screen) {
   const contextText = document.createElement('pre');
   contextText.className = 'p3-a3-context-text';
   contextText.textContent =
-    `El incidente comenzó aproximadamente a las ${INCIDENT_TIME}.\n` +
+    `El incidente comenz\u00f3 aproximadamente a las ${INCIDENT_TIME}.\n` +
     'Se eliminaron 5 archivos del sistema.\n' +
-    'Se dispone de copias de seguridad en múltiples orígenes con diferentes marcas de tiempo.\n' +
-    'Selecciona la fuente de recuperación para cada archivo.';
+    'Se dispone de copias de seguridad en m\u00faltiples or\u00edgenes con diferentes marcas de tiempo.\n' +
+    'Selecciona la fuente de recuperaci\u00f3n para cada archivo y confirma.';
   context.appendChild(contextText);
   wrap.appendChild(context);
 
-  // ========== RECOVERY FILES LIST ==========
+  const counter = document.createElement('div');
+  counter.className = 'p3-a3-counter';
+  const counterLabel = document.createElement('span');
+  counterLabel.className = 'p3-a3-counter-label';
+  counterLabel.textContent = 'DECISIONES CONFIRMADAS';
+  const counterValue = document.createElement('span');
+  counterValue.className = 'p3-a3-counter-value';
+  counterValue.textContent = '0 / ' + screen._a3TotalFiles;
+  counter.appendChild(counterLabel);
+  counter.appendChild(counterValue);
+  wrap.appendChild(counter);
+  screen._a3CounterEl = counterValue;
+
   const filesList = document.createElement('div');
   filesList.className = 'p3-a3-fileslist';
 
@@ -70,7 +104,6 @@ export function renderActivity3(screen) {
   filesLabel.textContent = 'ARCHIVOS PARA RECUPERAR';
   filesList.appendChild(filesLabel);
 
-  const fileItems = [];
   PHASE3.activity3.files.forEach((name, i) => {
     const item = document.createElement('div');
     item.className = 'p3-a3-fileitem';
@@ -92,80 +125,52 @@ export function renderActivity3(screen) {
     status.textContent = 'Sin recuperar';
     item.appendChild(status);
 
-    // Backup sources
     const sources = document.createElement('div');
     sources.className = 'p3-a3-sources';
 
+    const sourceBtns = {};
     ['drive', 'usb', 'd'].forEach((sourceKey) => {
       const backupTime = BACKUP_TIMES[sourceKey][i];
       const btn = document.createElement('button');
       btn.className = 'btn btn--small p3-a3-source-btn';
-      btn.textContent = `${BACKUP_LABELS[sourceKey]} — ${backupTime}`;
+      btn.textContent = `${BACKUP_LABELS[sourceKey]} \u2014 ${backupTime}`;
       btn.disabled = backupTime === 'No disponible';
       btn.dataset.fileindex = String(i);
       btn.dataset.source = sourceKey;
       btn.addEventListener('click', () => selectSource(screen, i, sourceKey, btn));
       sources.appendChild(btn);
+      sourceBtns[sourceKey] = btn;
     });
 
     item.appendChild(sources);
 
     const confirmBtn = document.createElement('button');
     confirmBtn.className = 'btn btn--primary p3-a3-confirm';
-    confirmBtn.textContent = 'CONFIRMAR SELECCIÓN';
+    confirmBtn.textContent = 'CONFIRMAR';
     confirmBtn.dataset.fileindex = String(i);
     confirmBtn.style.display = 'none';
-    confirmBtn.addEventListener('click', () => confirmSelection(screen, i));
+    confirmBtn.addEventListener('click', () => confirmFile(screen, i));
     item.appendChild(confirmBtn);
 
     filesList.appendChild(item);
-    fileItems.push({ item, status, sources, confirmBtn, selectedSource: null });
+
+    screen._a3FileItems.push({
+      item,
+      status,
+      sources,
+      confirmBtn,
+      sourceBtns,
+      selectedSource: null,
+    });
   });
   wrap.appendChild(filesList);
 
-  // ========== QUESTION SECTION ==========
-  const questionSection = document.createElement('div');
-  questionSection.className = 'p3-a3-question-section';
-  questionSection.style.display = 'none';
+  const resultSection = document.createElement('div');
+  resultSection.className = 'p3-a3-result';
+  resultSection.style.display = 'none';
+  screen._a3ResultSection = resultSection;
+  wrap.appendChild(resultSection);
 
-  const question = document.createElement('p');
-  question.className = 'p3-question';
-  question.textContent = '¿Qué fuente de recuperación utilzas para recuperar los 5 archivos eliminados durante el incidente?';
-  questionSection.appendChild(question);
-
-  const optionsEl = document.createElement('div');
-  optionsEl.className = 'p3-options';
-
-  const indices = PHASE3.activity3.options.map((_, i) => i);
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [indices[i], indices[j]] = [indices[j], indices[i]];
-  }
-
-  const optionEls = [];
-  indices.forEach((originalIndex) => {
-    const opt = document.createElement('button');
-    opt.className = 'btn p3-option';
-    opt.textContent = PHASE3.activity3.options[originalIndex];
-    opt.dataset.choice = String(originalIndex);
-    opt.addEventListener('click', () => {
-      if (screen._a3Answered) return;
-      screen._a3Answered = true;
-      handleA3Pick(screen, optionEls, originalIndex);
-    });
-    optionEls.push(opt);
-    optionsEl.appendChild(opt);
-  });
-  questionSection.appendChild(optionsEl);
-
-  const feedback = document.createElement('p');
-  feedback.className = 'p3-feedback';
-  feedback.dataset.feedback = 'a3';
-  questionSection.appendChild(feedback);
-
-  wrap.appendChild(questionSection);
-
-  // ========== NEXT BUTTON ==========
   const nextBtn = document.createElement('button');
   nextBtn.className = 'btn btn--primary p3-next';
   nextBtn.textContent = 'VER RESULTADO FINAL';
@@ -175,15 +180,9 @@ export function renderActivity3(screen) {
     screen._finishPhase3();
   });
   wrap.appendChild(nextBtn);
+  screen._a3NextEl = nextBtn;
 
   screen.rootEl.appendChild(wrap);
-
-  screen._a3FileItems = fileItems;
-  screen._a3FeedbackEl = feedback;
-  screen._a3NextEl = nextBtn;
-  screen._a3Selected = {};
-  screen._a3QuestionSection = questionSection;
-  screen._a3OptionEls = optionEls;
 }
 
 function fileIconForExt(ext) {
@@ -192,16 +191,16 @@ function fileIconForExt(ext) {
 }
 
 function selectSource(screen, fileIndex, sourceKey, btn) {
+  if (screen._a3Confirmed[fileIndex]) return;
+
   const item = screen._a3FileItems[fileIndex];
   const time = BACKUP_TIMES[sourceKey][fileIndex];
 
-  // Store selection
-  screen._a3Selected[fileIndex] = { source: sourceKey, time };
+  screen._a3Selections[fileIndex] = { source: sourceKey, time };
   item.selectedSource = sourceKey;
   item.status.textContent = 'Seleccionado';
   item.status.className = 'p3-a3-filestatus p3-a3-selected';
 
-  // Disable other source buttons for this file
   const allBtns = item.sources.querySelectorAll('.p3-a3-source-btn');
   allBtns.forEach((b) => {
     b.disabled = true;
@@ -214,28 +213,108 @@ function selectSource(screen, fileIndex, sourceKey, btn) {
   AudioManager.playSFX(AUDIO_SFX.INTERACTION);
 }
 
-function confirmSelection(screen, fileIndex) {
+function confirmFile(screen, fileIndex) {
+  if (screen._a3Confirmed[fileIndex]) return;
+  if (!screen._a3Selections[fileIndex]) return;
+
+  screen._a3Confirmed[fileIndex] = true;
+  screen._a3ConfirmedCount++;
+
   const item = screen._a3FileItems[fileIndex];
-  item.item.querySelector('button.p3-a3-confirm').style.display = 'none';
-  item.status.textContent = 'Seleccionado';
+  const selection = screen._a3Selections[fileIndex];
+
+  item.confirmBtn.style.display = 'none';
+  item.status.textContent = 'CONFIRMADA';
+  item.status.className = 'p3-a3-filestatus p3-a3-confirmed';
+  item.item.classList.add('confirmed');
+
+  const badge = document.createElement('span');
+  badge.className = 'p3-a3-confirmed-badge';
+  badge.textContent = `${BACKUP_LABELS[selection.source]} \u2014 ${selection.time}`;
+  item.item.appendChild(badge);
+
+  const allBtns = item.sources.querySelectorAll('.p3-a3-source-btn');
+  allBtns.forEach((b) => { b.disabled = true; });
+
   AudioManager.playSFX(AUDIO_SFX.CLICK);
+
+  screen._a3CounterEl.textContent =
+    screen._a3ConfirmedCount + ' / ' + screen._a3TotalFiles;
+
+  if (screen._a3ConfirmedCount >= screen._a3TotalFiles) {
+    evaluateAllFiles(screen);
+  }
 }
 
-function handleA3Pick(screen, optionEls, index) {
-  const correct = index === PHASE3.activity3.correctIndex;
-  const score = scoreActivity3(index);
-  screen._setP3({ activity3Score: score });
-  AudioManager.playSFX(correct ? AUDIO_SFX.SUCCESS : AUDIO_SFX.ERROR);
+function evaluateAllFiles(screen) {
+  let correctCount = 0;
+  const fileResults = [];
 
-  optionEls.forEach((o, i) => {
-    o.disabled = true;
-    if (i === index) o.classList.add(correct ? 'chosen-correct' : 'chosen-wrong');
-    if (i === PHASE3.activity3.correctIndex) o.classList.add('reveal-correct');
+  PHASE3.activity3.files.forEach((name, i) => {
+    const selection = screen._a3Selections[i];
+    const selectedMinutes = timeToMinutes(selection.time);
+    const isCorrect = selectedMinutes >= 0 && selectedMinutes < INCIDENT_MINUTES;
+    if (isCorrect) correctCount++;
+    fileResults.push({ name, source: selection.source, time: selection.time, isCorrect });
   });
 
-  screen._a3FeedbackEl.textContent =
-    correct ? PHASE3.activity3.explanation : PHASE3.activity3.explanation;
-  screen._a3FeedbackEl.className = 'p3-feedback';
-  screen._a3FeedbackEl.style.color = correct ? 'var(--p3-blue)' : 'var(--alert-red)';
+  const score = scoreFromCorrectCount(correctCount);
+  screen._setP3({ activity3Score: score });
+
+  const resultSection = screen._a3ResultSection;
+  resultSection.style.display = '';
+  resultSection.innerHTML = '';
+
+  const heading = document.createElement('div');
+  heading.className = 'p3-a3-result-heading';
+  heading.textContent = 'RECUPERACI\u00d3N COMPLETADA';
+  resultSection.appendChild(heading);
+
+  const items = document.createElement('div');
+  items.className = 'p3-a3-result-items';
+
+  fileResults.forEach((r) => {
+    const row = document.createElement('div');
+    row.className = 'p3-a3-result-item';
+
+    const fname = document.createElement('span');
+    fname.className = 'filename';
+    fname.textContent = r.name;
+
+    const verdict = document.createElement('span');
+    verdict.className = 'verdict ' + (r.isCorrect ? 'correct' : 'incorrect');
+    verdict.textContent = r.isCorrect ? 'Correcta' : 'Incorrecta';
+
+    row.appendChild(fname);
+    row.appendChild(verdict);
+    items.appendChild(row);
+  });
+
+  resultSection.appendChild(items);
+
+  const summary = document.createElement('div');
+  summary.style.textAlign = 'center';
+  summary.style.fontSize = '13px';
+  summary.style.color = '#d6e8f5';
+  summary.style.marginTop = '8px';
+  summary.textContent =
+    `${correctCount} de ${screen._a3TotalFiles} recuperaciones correctas \u00b7 Puntaje: ${formatScore(score)} / ${PHASE3.activity3.points}`;
+  resultSection.appendChild(summary);
+
   screen._a3NextEl.style.display = 'inline-block';
+
+  if (correctCount === screen._a3TotalFiles) {
+    AudioManager.playSFX(AUDIO_SFX.SUCCESS);
+  } else {
+    AudioManager.playSFX(AUDIO_SFX.ERROR);
+  }
+}
+
+function scoreFromCorrectCount(correctCount) {
+  if (correctCount === 0) return 0;
+  if (correctCount === 1) return 0;
+  if (correctCount === 2) return 1;
+  if (correctCount === 3) return 1;
+  if (correctCount === 4) return 2;
+  return PHASE3.activity3.points;
 }

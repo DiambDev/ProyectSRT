@@ -4,6 +4,8 @@ import { State } from '../../../core/state.js';
 import { UIManager } from '../../../ui/uiManager.js';
 import { PHASE3, clampActivity2, formatScore } from './phase3Data.js';
 
+const TIMER_SECONDS = 600;
+
 export function renderActivity2(screen) {
   if (!screen._alive) return;
   screen._setP3({ currentActivity: 'activity2' });
@@ -14,16 +16,24 @@ export function renderActivity2(screen) {
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
   titlebar.innerHTML =
-    '<span>ACTIVIDAD 2 DE 3 \u00b7 ARCHIVOS RECUPERADOS</span>' +
+    '<span>ACTIVIDAD 2 DE 3 \u00b7 VERIFICACI\u00d3N DE INTEGRIDAD</span>' +
     '<div class="p3-dots"><span></span><span></span><span></span></div>';
   windowEl.appendChild(titlebar);
 
   const toolbar = document.createElement('div');
   toolbar.className = 'p3-exp-toolbar';
+
   const counts = document.createElement('span');
   counts.className = 'p3-exp-counts';
   counts.dataset.counts = 'a2';
   toolbar.appendChild(counts);
+
+  const timer = document.createElement('span');
+  timer.className = 'p3-exp-timer';
+  timer.dataset.timer = 'a2';
+  timer.textContent = '10:00';
+  toolbar.appendChild(timer);
+
   windowEl.appendChild(toolbar);
 
   const body = document.createElement('div');
@@ -55,7 +65,7 @@ export function renderActivity2(screen) {
   deleteBtn.dataset.action = 'delete';
   const finishBtn = document.createElement('button');
   finishBtn.className = 'btn btn--primary';
-  finishBtn.textContent = 'FINALIZAR VERIFICACIÓN';
+  finishBtn.textContent = 'FINALIZAR VERIFICACI\u00d3N';
   finishBtn.dataset.action = 'finish-a2';
 
   footer.appendChild(feedback);
@@ -73,16 +83,50 @@ export function renderActivity2(screen) {
   screen._a2CountsEl = counts;
   screen._a2AsideEl = aside;
   screen._a2FeedbackEl = feedback;
+  screen._a2TimerEl = timer;
 
   deleteBtn.addEventListener('click', () => handleDelete(screen));
   finishBtn.addEventListener('click', () => handleFinish(screen));
 
   renderFileList(screen);
   updateA2Summary(screen);
+  startA2Timer(screen);
+}
+
+function startA2Timer(screen) {
+  let remaining = TIMER_SECONDS;
+  screen._a2TimerInterval = setInterval(() => {
+    if (!screen._alive) {
+      clearInterval(screen._a2TimerInterval);
+      screen._a2TimerInterval = null;
+      return;
+    }
+    remaining--;
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    screen._a2TimerEl.textContent =
+      String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+    if (remaining <= 60) {
+      screen._a2TimerEl.classList.add('danger');
+      screen._a2TimerEl.classList.remove('warning');
+    } else if (remaining <= 180) {
+      screen._a2TimerEl.classList.add('warning');
+    }
+
+    if (remaining <= 0) {
+      clearInterval(screen._a2TimerInterval);
+      screen._a2TimerInterval = null;
+      handleTimeout(screen);
+    }
+  }, 1000);
+  screen._intervalId = screen._a2TimerInterval;
 }
 
 function formatTime(totalSeconds) {
-  return '';
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
 }
 
 function fileIconForExt(ext) {
@@ -105,10 +149,10 @@ function extLabelForExt(ext) {
     DOCX: 'Documento de Microsoft Word',
     PDF: 'Documento PDF',
     TXT: 'Archivo de texto',
-    XLSX: 'Hoja de cálculo',
+    XLSX: 'Hoja de c\u00e1lculo',
     PNG: 'Imagen PNG',
     JPG: 'Imagen JPG',
-    PPTX: 'Presentación',
+    PPTX: 'Presentaci\u00f3n',
     MP4: 'Video MP4',
     WAV: 'Audio WAV',
   };
@@ -178,19 +222,17 @@ function inspectFile(screen, f) {
   const content = document.createElement('div');
   content.className = 'p3-file-detail';
 
-  // File identity section
   const identity = document.createElement('div');
   identity.className = 'p3-file-identity';
 
   const title = document.createElement('div');
   title.className = 'p3-file-detail-title';
-  title.textContent = 'INFORMACIÓN DEL ARCHIVO';
+  title.textContent = 'INFORMACI\u00d3N DEL ARCHIVO';
   identity.appendChild(title);
 
   const infoTable = document.createElement('div');
   infoTable.className = 'p3-file-info';
 
-  // General file info
   const fields = [
     ['Nombre', f.name],
     ['Tipo', extLabelForExt(ext)],
@@ -213,7 +255,6 @@ function inspectFile(screen, f) {
 
   identity.appendChild(infoTable);
 
-  // Hash data shown in two neutral blocks
   const hashBlock1 = document.createElement('div');
   hashBlock1.className = 'p3-file-info';
   hashBlock1.style.marginTop = '12px';
@@ -222,7 +263,7 @@ function inspectFile(screen, f) {
 
   const hLbl1 = document.createElement('span');
   hLbl1.className = 'p3-info-label';
-  hLbl1.textContent = 'Reg. interno \u2014 SHA-256';
+  hLbl1.textContent = 'SHA-256 (Registro)';
   const hVal1 = document.createElement('span');
   hVal1.className = 'p3-info-value';
   hVal1.textContent = truncateHash(f.expectedHash);
@@ -236,7 +277,7 @@ function inspectFile(screen, f) {
 
   const hLbl2 = document.createElement('span');
   hLbl2.className = 'p3-info-label';
-  hLbl2.textContent = 'Verificaci\u00f3n \u2014 SHA-256';
+  hLbl2.textContent = 'SHA-256 (Verificaci\u00f3n)';
   const hVal2 = document.createElement('span');
   hVal2.className = 'p3-info-value';
   hVal2.textContent = truncateHash(f.currentHash);
@@ -249,7 +290,6 @@ function inspectFile(screen, f) {
 
   content.appendChild(identity);
 
-  // Document content preview
   const contentSection = document.createElement('div');
   contentSection.className = 'p3-file-content-preview';
 
@@ -274,7 +314,7 @@ function inspectFile(screen, f) {
 }
 
 function truncateHash(hash) {
-  if (!hash) return '—';
+  if (!hash) return '\u2014';
   return hash.slice(0, 8) + '...' + hash.slice(-4);
 }
 
@@ -340,7 +380,7 @@ function updateA2Summary(screen) {
   aside.innerHTML = '';
   const h = document.createElement('h4');
   h.className = 'p3-check-title';
-  h.textContent = 'INFORMACIÓN';
+  h.textContent = 'INFORMACI\u00d3N';
   aside.appendChild(h);
 
   const rows = [
@@ -352,7 +392,7 @@ function updateA2Summary(screen) {
     li.className = 'p3-check-item';
     const mark = document.createElement('span');
     mark.className = 'p3-check-mark';
-    mark.textContent = '—';
+    mark.textContent = '\u2014';
     const lab = document.createElement('span');
     lab.className = 'p3-check-label';
     lab.textContent = r.label;
@@ -367,20 +407,26 @@ function updateA2Summary(screen) {
 }
 
 function handleFinish(screen) {
+  if (screen._a2TimerInterval) {
+    clearInterval(screen._a2TimerInterval);
+    screen._a2TimerInterval = null;
+    screen._intervalId = null;
+  }
+
   const st = State.get('phase3State');
   AudioManager.playSFX(AUDIO_SFX.SUCCESS);
 
   const content = document.createElement('div');
   content.className = 'p3-summary-popup';
   const lines = [
-    ['VERIFICACIÓN FINALIZADA', 'heading'],
+    ['VERIFICACI\u00d3N FINALIZADA', 'heading'],
     ['Archivos procesados', String(st.files.filter((f) => f.isDeleted).length)],
     ['Archivos correctamente identificados', String(st.correctDeletions)],
     ['Archivos eliminados incorrectamente', String(st.incorrectDeletions)],
     ['Puntaje de la actividad', `${formatScore(st.activity2Score)} / ${PHASE3.activity2.maxScore}`],
   ];
   lines.forEach(([label, value]) => {
-    if (label === 'VERIFICACIÓN FINALIZADA') {
+    if (label === 'VERIFICACI\u00d3N FINALIZADA') {
       const h = document.createElement('h3');
       h.className = 'p3-summary-heading';
       h.textContent = label;
@@ -407,4 +453,42 @@ function handleFinish(screen) {
 }
 
 function handleTimeout(screen) {
+  if (screen._a2TimerInterval) {
+    clearInterval(screen._a2TimerInterval);
+    screen._a2TimerInterval = null;
+    screen._intervalId = null;
+  }
+
+  screen._setP3({
+    activity2Score: 0,
+    activity2Raw: 0,
+    correctDeletions: 0,
+    incorrectDeletions: 0,
+  });
+
+  AudioManager.playSFX(AUDIO_SFX.ERROR);
+
+  screen._a2FeedbackEl.textContent = 'TIEMPO AGOTADO \u00b7 PUNTAJE: 0 / ' + PHASE3.activity2.maxScore;
+  screen._a2FeedbackEl.className = 'p3-exp-feedback';
+  screen._a2FeedbackEl.style.color = 'var(--alert-red)';
+
+  const content = document.createElement('div');
+  content.className = 'p3-summary-popup';
+  const h = document.createElement('h3');
+  h.className = 'p3-summary-heading';
+  h.textContent = 'TIEMPO AGOTADO';
+  h.style.color = 'var(--alert-red)';
+  content.appendChild(h);
+  const p = document.createElement('p');
+  p.style.fontSize = '13px';
+  p.style.color = '#d6e8f5';
+  p.textContent = 'Se agot\u00f3 el tiempo de verificaci\u00f3n. No se complet\u00f3 la actividad.';
+  content.appendChild(p);
+
+  UIManager.createPopup({
+    title: 'ACTIVIDAD 2 \u00b7 TIEMPO AGOTADO',
+    content,
+    buttonText: 'CONTINUAR',
+    onClose: () => screen._buildActivity3(),
+  });
 }
