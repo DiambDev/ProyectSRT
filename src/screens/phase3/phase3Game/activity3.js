@@ -3,55 +3,44 @@ import { AudioManager } from '../../../audio/audioManager.js';
 import { PHASE3, formatScore } from './phase3Data.js';
 
 const INCIDENT_TIME = '02:40 a. m.';
-const INCIDENT_MINUTES = 2 * 60 + 40;
 
 const FILE_SOURCES = [
   [
-    { label: 'Google Drive', time: '02:50 a. m.' },
-    { label: 'USB', time: '00:30 a. m.' },
-    { label: 'Carpeta de respaldo local', time: '03:10 a. m.' },
+    { label: 'Carpeta de respaldo local', time: '01:50 a. m.', note: 'Copia automática guardada en el propio equipo afectado (EQUIPO-TSC-02).', correct: false },
+    { label: 'Disco externo', time: '01:15 a. m.', note: 'Disco externo desconectado del equipo durante toda la madrugada; respaldo realizado el día anterior.', correct: true },
+    { label: 'Almacenamiento en la nube', time: '02:55 a. m.', note: 'Sincronizado desde EQUIPO-TSC-02 antes de la suspensión de la nube.', correct: false },
   ],
   [
-    { label: 'Disco externo', time: '01:45 a. m.' },
-    { label: 'Google Drive', time: '02:55 a. m.' },
-    { label: 'Copia de red del servidor', time: '03:05 a. m.' },
+    { label: 'Servidor institucional', time: '02:20 a. m.', note: 'Copia en el servidor externo, fuera del equipo afectado y sin compromiso.', correct: true },
+    { label: 'USB', time: '03:40 a. m.', note: 'USB conectado al equipo afectado durante la revisión posterior al incidente.', correct: false },
+    { label: 'Almacenamiento en la nube', time: '01:55 a. m.', note: 'Copia en la cuenta en la nube asociada al equipo afectado.', correct: false },
   ],
   [
-    { label: 'Copia de red del servidor', time: '02:15 a. m.' },
-    { label: 'USB', time: '03:40 a. m.' },
-    { label: 'Google Drive', time: '02:50 a. m.' },
+    { label: 'Historial del sistema', time: '02:15 a. m.', note: 'El historial local se restableció a las 03:00 a. m.; corresponde al equipo afectado.', correct: false },
+    { label: 'Disco externo', time: '03:25 a. m.', note: 'Disco externo conectado al equipo durante la revisión posterior.', correct: false },
+    { label: 'Copia de red del servidor', time: '01:05 a. m.', note: 'Copia previa al incidente almacenada en el servidor institucional, fuera del equipo afectado.', correct: true },
   ],
   [
-    { label: 'USB', time: '01:20 a. m.' },
-    { label: 'Disco externo', time: '03:20 a. m.' },
-    { label: 'Historial de archivos', time: '02:50 a. m.' },
+    { label: 'Carpeta de respaldo local', time: '02:05 a. m.', note: 'Respaldo guardado en el propio equipo afectado antes de la declaración.', correct: false },
+    { label: 'USB', time: '00:20 a. m.', note: 'USB que permaneció conectado al equipo durante la actividad no autorizada.', correct: false },
+    { label: 'Disco externo', time: '01:45 a. m.', note: 'Disco externo desconectado durante la madrugada; respaldo realizado antes del incidente.', correct: true },
   ],
   [
-    { label: 'Google Drive', time: '02:10 a. m.' },
-    { label: 'Copia de red del servidor', time: '03:30 a. m.' },
-    { label: 'Disco externo', time: '01:00 a. m.' },
+    { label: 'Servidor institucional', time: '02:30 a. m.', note: 'Copia institucional sin conexión con el equipo afectado; respaldo previo al incidente.', correct: true },
+    { label: 'Disco externo', time: '03:35 a. m.', note: 'Disco externo conectado al equipo durante la revisión posterior.', correct: false },
+    { label: 'Almacenamiento en la nube', time: '00:05 a. m.', note: 'Copia en la nube asociada a la cuenta del equipo afectado.', correct: false },
   ],
 ];
-
-function timeToMinutes(timeStr) {
-  if (!timeStr || timeStr === 'No disponible') return -1;
-  const match = timeStr.match(/(\d{1,2}):(\d{2})/);
-  if (!match) return -1;
-  let mins = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
-  if (timeStr.includes('a. m.') && match[1] === '12') mins = 0;
-  if (timeStr.includes('p. m.') && match[1] !== '12') mins += 12 * 60;
-  return mins;
-}
 
 export function renderActivity3(screen) {
   if (!screen._alive) return;
   screen._setP3({ currentActivity: 'activity3' });
   screen.rootEl.innerHTML = '';
 
-  screen._a3ConfirmedCount = 0;
+  screen._a3SelectedCount = 0;
   screen._a3TotalFiles = PHASE3.activity3.files.length;
   screen._a3Selections = {};
-  screen._a3Confirmed = {};
+  screen._a3Locked = false;
   screen._a3FileItems = [];
 
   const wrap = document.createElement('div');
@@ -60,7 +49,7 @@ export function renderActivity3(screen) {
   const titlebar = document.createElement('div');
   titlebar.className = 'p3-titlebar';
   titlebar.innerHTML =
-    '<span>ACTIVIDAD 3 DE 3 \u00b7 RECOVERY CENTER</span>' +
+    'ACTIVIDAD 3 DE 3 \u00b7 RECOVERY CENTER' +
     '<div class="p3-dots"><span></span><span></span><span></span></div>';
   wrap.appendChild(titlebar);
 
@@ -75,9 +64,14 @@ export function renderActivity3(screen) {
   contextText.className = 'p3-a3-context-text';
   contextText.textContent =
     `El incidente comenz\u00f3 aproximadamente a las ${INCIDENT_TIME}.\n` +
-    'Se eliminaron 5 archivos del sistema.\n' +
-    'Se dispone de copias de seguridad en m\u00faltiples or\u00edgenes con diferentes marcas de tiempo.\n' +
-    'Selecciona la fuente de recuperaci\u00f3n para cada archivo y confirma.';
+    'La telemetr\u00eda registra actividad no autorizada en EQUIPO-TSC-02 desde al menos las 00:30 a. m.\n' +
+    'No se puede descartar que los archivos del equipo y de los dispositivos conectados a \u00e9l hayan sido alterados.\n\n' +
+    'Datos de la investigaci\u00f3n:\n' +
+    '- La cuenta en la nube asociada al equipo fue accedida por el atacante; la sincronizaci\u00f3n se suspendi\u00f3 a las 03:15 a. m.\n' +
+    '- El servidor institucional es externo al equipo y NO estuvo comprometido.\n' +
+    '- El historial de archivos del sistema se restableci\u00f3 a las 03:00 a. m.\n' +
+    '- Un disco externo que no estuvo conectado al equipo durante la madrugada es una fuente independiente confiable.\n\n' +
+    'Selecciona la fuente de recuperaci\u00f3n para cada archivo y, cuando los 5 est\u00e9n seleccionados, confirma.';
   context.appendChild(contextText);
   wrap.appendChild(context);
 
@@ -85,7 +79,7 @@ export function renderActivity3(screen) {
   counter.className = 'p3-a3-counter';
   const counterLabel = document.createElement('span');
   counterLabel.className = 'p3-a3-counter-label';
-  counterLabel.textContent = 'DECISIONES CONFIRMADAS';
+  counterLabel.textContent = 'ARCHIVOS SELECCIONADOS';
   const counterValue = document.createElement('span');
   counterValue.className = 'p3-a3-counter-value';
   counterValue.textContent = '0 / ' + screen._a3TotalFiles;
@@ -126,28 +120,27 @@ export function renderActivity3(screen) {
     const sources = document.createElement('div');
     sources.className = 'p3-a3-sources';
 
-    const sourceBtns = {};
-    const fileSources = FILE_SOURCES[i];
-    fileSources.forEach((src, si) => {
+    FILE_SOURCES[i].forEach((src, si) => {
+      const block = document.createElement('div');
+      block.className = 'p3-a3-source';
+
       const btn = document.createElement('button');
       btn.className = 'btn btn--small p3-a3-source-btn';
       btn.textContent = `${src.label} \u2014 ${src.time}`;
       btn.dataset.fileindex = String(i);
       btn.dataset.source = String(si);
-      btn.addEventListener('click', () => selectSource(screen, i, si, btn));
-      sources.appendChild(btn);
-      sourceBtns[String(si)] = btn;
+      btn.addEventListener('click', () => selectSource(screen, i, si));
+      block.appendChild(btn);
+
+      const note = document.createElement('div');
+      note.className = 'p3-a3-source-note';
+      note.textContent = src.note;
+      block.appendChild(note);
+
+      sources.appendChild(block);
     });
 
     item.appendChild(sources);
-
-    const confirmBtn = document.createElement('button');
-    confirmBtn.className = 'btn btn--primary p3-a3-confirm';
-    confirmBtn.textContent = 'CONFIRMAR';
-    confirmBtn.dataset.fileindex = String(i);
-    confirmBtn.style.display = 'none';
-    confirmBtn.addEventListener('click', () => confirmFile(screen, i));
-    item.appendChild(confirmBtn);
 
     filesList.appendChild(item);
 
@@ -155,12 +148,21 @@ export function renderActivity3(screen) {
       item,
       status,
       sources,
-      confirmBtn,
-      sourceBtns,
       selectedSource: null,
     });
   });
   wrap.appendChild(filesList);
+
+  const confirmRow = document.createElement('div');
+  confirmRow.className = 'p3-a3-confirmrow';
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'btn btn--primary p3-a3-confirm-final';
+  confirmBtn.textContent = 'CONFIRMAR RECUPERACI\u00d3N';
+  confirmBtn.style.display = 'none';
+  confirmBtn.addEventListener('click', () => confirmRecovery(screen));
+  confirmRow.appendChild(confirmBtn);
+  wrap.appendChild(confirmRow);
+  screen._a3ConfirmFinalEl = confirmBtn;
 
   const resultSection = document.createElement('div');
   resultSection.className = 'p3-a3-result';
@@ -187,60 +189,51 @@ function fileIconForExt(ext) {
   return icons[ext.toUpperCase()] || 'F';
 }
 
-function selectSource(screen, fileIndex, sourceIndex, btn) {
-  if (screen._a3Confirmed[fileIndex]) return;
+function selectSource(screen, fileIndex, sourceIndex) {
+  if (screen._a3Locked) return;
 
   const item = screen._a3FileItems[fileIndex];
-  const src = FILE_SOURCES[fileIndex][sourceIndex];
-
-  screen._a3Selections[fileIndex] = { source: sourceIndex, label: src.label, time: src.time };
-  item.selectedSource = sourceIndex;
-  item.status.textContent = 'Seleccionado';
-  item.status.className = 'p3-a3-filestatus p3-a3-selected';
-
   const allBtns = item.sources.querySelectorAll('.p3-a3-source-btn');
-  allBtns.forEach((b) => {
-    b.disabled = true;
-    if (b.dataset.source === String(sourceIndex)) {
-      b.classList.add('source-selected');
-    }
-  });
+  allBtns.forEach((b) => b.classList.remove('source-selected'));
 
-  item.confirmBtn.style.display = 'inline-block';
+  if (item.selectedSource === sourceIndex) {
+    item.selectedSource = null;
+    delete screen._a3Selections[fileIndex];
+    item.status.textContent = 'Sin recuperar';
+    item.status.className = 'p3-a3-filestatus';
+  } else {
+    const src = FILE_SOURCES[fileIndex][sourceIndex];
+    screen._a3Selections[fileIndex] = { source: sourceIndex, label: src.label, time: src.time };
+    item.selectedSource = sourceIndex;
+    allBtns[sourceIndex].classList.add('source-selected');
+    item.status.textContent = 'Seleccionado';
+    item.status.className = 'p3-a3-filestatus p3-a3-selected';
+  }
+
   AudioManager.playSFX(AUDIO_SFX.INTERACTION);
+  updateProgress(screen);
 }
 
-function confirmFile(screen, fileIndex) {
-  if (screen._a3Confirmed[fileIndex]) return;
-  if (!screen._a3Selections[fileIndex]) return;
+function updateProgress(screen) {
+  const count = Object.keys(screen._a3Selections).length;
+  screen._a3CounterEl.textContent = count + ' / ' + screen._a3TotalFiles;
+  screen._a3CounterEl.classList.toggle('complete', count === screen._a3TotalFiles);
+  screen._a3ConfirmFinalEl.style.display =
+    count === screen._a3TotalFiles ? 'inline-block' : 'none';
+}
 
-  screen._a3Confirmed[fileIndex] = true;
-  screen._a3ConfirmedCount++;
+function confirmRecovery(screen) {
+  if (screen._a3Locked) return;
+  if (Object.keys(screen._a3Selections).length !== screen._a3TotalFiles) return;
 
-  const item = screen._a3FileItems[fileIndex];
-  const selection = screen._a3Selections[fileIndex];
+  screen._a3Locked = true;
+  screen._a3FileItems.forEach((fi) => {
+    fi.sources.querySelectorAll('.p3-a3-source-btn').forEach((b) => {
+      b.disabled = true;
+    });
+  });
 
-  item.confirmBtn.style.display = 'none';
-  item.status.textContent = 'CONFIRMADA';
-  item.status.className = 'p3-a3-filestatus p3-a3-confirmed';
-  item.item.classList.add('confirmed');
-
-  const badge = document.createElement('span');
-  badge.className = 'p3-a3-confirmed-badge';
-  badge.textContent = `${selection.label} \u2014 ${selection.time}`;
-  item.item.appendChild(badge);
-
-  const allBtns = item.sources.querySelectorAll('.p3-a3-source-btn');
-  allBtns.forEach((b) => { b.disabled = true; });
-
-  AudioManager.playSFX(AUDIO_SFX.CLICK);
-
-  screen._a3CounterEl.textContent =
-    screen._a3ConfirmedCount + ' / ' + screen._a3TotalFiles;
-
-  if (screen._a3ConfirmedCount >= screen._a3TotalFiles) {
-    evaluateAllFiles(screen);
-  }
+  evaluateAllFiles(screen);
 }
 
 function evaluateAllFiles(screen) {
@@ -249,10 +242,10 @@ function evaluateAllFiles(screen) {
 
   PHASE3.activity3.files.forEach((name, i) => {
     const selection = screen._a3Selections[i];
-    const selectedMinutes = timeToMinutes(selection.time);
-    const isCorrect = selectedMinutes >= 0 && selectedMinutes < INCIDENT_MINUTES;
+    const src = FILE_SOURCES[i][selection.source];
+    const isCorrect = !!src.correct;
     if (isCorrect) correctCount++;
-    fileResults.push({ name, source: selection.source, time: selection.time, isCorrect });
+    fileResults.push({ name, source: src.label, time: src.time, isCorrect });
   });
 
   const score = scoreFromCorrectCount(correctCount);

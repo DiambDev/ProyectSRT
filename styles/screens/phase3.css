@@ -12,7 +12,7 @@
 .phase3-root {
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: auto;
 }
 
 .p3-activity {
@@ -138,6 +138,17 @@
   letter-spacing: 0.5px;
   line-height: 1.6;
   text-align: center;
+}
+
+.p3-report-window button[data-action="start-a1"] {
+  display: block;
+  margin: 28px auto 6px;
+  width: fit-content;
+  min-width: 340px;
+  padding: 16px 44px;
+  font-size: 17px;
+  letter-spacing: 2px;
+  box-shadow: 0 0 18px var(--p3-glow);
 }
 
 .p3-stage-chip {
@@ -488,6 +499,36 @@
   margin: 0 auto;
 }
 
+.p3-a2-mission {
+  margin: 0 0 14px;
+  padding: 14px 18px;
+  background: var(--p3-surface);
+  border: 1px solid var(--p3-border);
+  border-left: 3px solid var(--p3-blue);
+  box-shadow: 0 0 18px rgba(0, 174, 239, 0.12);
+}
+
+.p3-a2-mission-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--p3-blue);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.p3-a2-mission-text {
+  font-size: 13px;
+  color: #d6e8f5;
+  line-height: 1.7;
+  margin-bottom: 6px;
+}
+
+.p3-a2-mission-note {
+  font-size: 12px;
+  color: #8aaac4;
+  line-height: 1.6;
+}
+
 .p3-explorer {
   background: var(--p3-surface);
   border: 1px solid var(--p3-border);
@@ -521,13 +562,41 @@
   white-space: nowrap;
 }
 
-.p3-exp-timer {
+.p3-exp-timer-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 10px;
+  padding: 6px 14px;
+  border: 1px solid var(--p3-blue-dark);
+  border-radius: 3px;
+  background: rgba(0, 174, 239, 0.08);
+  box-shadow: 0 0 12px var(--p3-glow);
+  animation: p3TimerPulse 2s ease-in-out infinite;
+}
+
+.p3-exp-timer-box.warning {
+  border-color: var(--alert-yellow);
+  box-shadow: 0 0 14px rgba(240, 192, 64, 0.35);
+}
+
+.p3-exp-timer-box.danger {
+  border-color: var(--alert-red);
+  box-shadow: 0 0 16px rgba(255, 32, 32, 0.45);
+  animation-duration: 0.8s;
+}
+
+.p3-exp-timer-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #8aaac4;
+  white-space: nowrap;
+}
+
+.p3-exp-timer {
+  font-size: 16px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--p3-blue);
+  color: var(--p3-blue-light);
   letter-spacing: 1px;
 }
 
@@ -537,16 +606,17 @@
 
 .p3-exp-timer.danger {
   color: var(--alert-red);
-  animation: pulse 1s ease infinite;
 }
 
-.p3-exp-timer::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
+@keyframes p3TimerPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(0, 174, 239, 0.25);
+    border-color: var(--p3-blue-dark);
+  }
+  50% {
+    box-shadow: 0 0 18px var(--p3-glow);
+    border-color: var(--p3-blue);
+  }
 }
 
 /* --- A2 Body --- */
@@ -1001,8 +1071,10 @@
 
 .p3-a3-sources {
   display: flex;
-  gap: 6px;
+  gap: 10px;
   margin-left: auto;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .p3-a3-source-btn {
@@ -1035,6 +1107,38 @@
   padding: 5px 14px !important;
   font-size: 11px !important;
   margin-left: 8px;
+}
+
+/* --- A3 Source blocks (label + note) --- */
+
+.p3-a3-source {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.p3-a3-source-note {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #5a7a9c;
+  max-width: 220px;
+}
+
+/* --- A3 Final Confirm Row --- */
+
+.p3-a3-confirmrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 24px 24px;
+  border-top: 1px solid var(--p3-border);
+}
+
+.p3-a3-confirm-final {
+  font-size: 15px;
+  padding: 13px 30px;
+  letter-spacing: 2px;
+  box-shadow: 0 0 16px var(--p3-glow);
 }
 
 /* --- A3 Confirmed Badge --- */

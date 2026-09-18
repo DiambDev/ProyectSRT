@@ -28,11 +28,18 @@ export function renderActivity2(screen) {
   counts.dataset.counts = 'a2';
   toolbar.appendChild(counts);
 
+  const timerBox = document.createElement('div');
+  timerBox.className = 'p3-exp-timer-box';
+  const timerLabel = document.createElement('span');
+  timerLabel.className = 'p3-exp-timer-label';
+  timerLabel.textContent = 'TIEMPO RESTANTE';
   const timer = document.createElement('span');
   timer.className = 'p3-exp-timer';
   timer.dataset.timer = 'a2';
   timer.textContent = '10:00';
-  toolbar.appendChild(timer);
+  timerBox.appendChild(timerLabel);
+  timerBox.appendChild(timer);
+  toolbar.appendChild(timerBox);
 
   windowEl.appendChild(toolbar);
 
@@ -76,6 +83,23 @@ export function renderActivity2(screen) {
   screen.rootEl.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'p3-activity p3-activity-2';
+
+  const mission = document.createElement('div');
+  mission.className = 'p3-a2-mission';
+  const missionTitle = document.createElement('div');
+  missionTitle.className = 'p3-a2-mission-title';
+  missionTitle.textContent = 'MISI\u00d3N';
+  const missionText = document.createElement('p');
+  missionText.className = 'p3-a2-mission-text';
+  missionText.textContent = PHASE3.activity2.mission;
+  const missionNote = document.createElement('p');
+  missionNote.className = 'p3-a2-mission-note';
+  missionNote.textContent = PHASE3.activity2.missionNote;
+  mission.appendChild(missionTitle);
+  mission.appendChild(missionText);
+  mission.appendChild(missionNote);
+  wrap.appendChild(mission);
+
   wrap.appendChild(windowEl);
   screen.rootEl.appendChild(wrap);
 
@@ -84,13 +108,25 @@ export function renderActivity2(screen) {
   screen._a2AsideEl = aside;
   screen._a2FeedbackEl = feedback;
   screen._a2TimerEl = timer;
+  screen._a2TimerBoxEl = timerBox;
 
   deleteBtn.addEventListener('click', () => handleDelete(screen));
   finishBtn.addEventListener('click', () => handleFinish(screen));
 
+  const st = State.get('phase3State');
+  screen._a2DisplayOrder = shuffleList(st.files);
   renderFileList(screen);
   updateA2Summary(screen);
   startA2Timer(screen);
+}
+
+function shuffleList(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 function startA2Timer(screen) {
@@ -108,9 +144,12 @@ function startA2Timer(screen) {
       String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
 
     if (remaining <= 60) {
+      screen._a2TimerBoxEl.classList.add('danger');
+      screen._a2TimerBoxEl.classList.remove('warning');
       screen._a2TimerEl.classList.add('danger');
       screen._a2TimerEl.classList.remove('warning');
     } else if (remaining <= 180) {
+      screen._a2TimerBoxEl.classList.add('warning');
       screen._a2TimerEl.classList.add('warning');
     }
 
@@ -209,8 +248,9 @@ function fileRow(screen, f) {
 
 function renderFileList(screen) {
   const st = State.get('phase3State');
+  const order = screen._a2DisplayOrder || st.files;
   screen._a2ListEl.innerHTML = '';
-  st.files.forEach((f) => screen._a2ListEl.appendChild(fileRow(screen, f)));
+  order.forEach((f) => screen._a2ListEl.appendChild(fileRow(screen, f)));
 }
 
 function inspectFile(screen, f) {

@@ -20,12 +20,13 @@ import { isCorrectSequence } from './phase1Validator.js';
 
 const PANEL_LOG_LEFT = [
   'ticket INT-2290 asignado', 'segmento WEB-001 aislado', 'forense: volcado iniciado',
+  'vector: reutilización de credenciales comprometidas', 'alerta: cuenta del atacante sigue activa',
   'evidencia: bitácora retenida', 'alcance: 3 hosts confirmados',
 ];
 
 const PANEL_LOG_RIGHT = [
   'sesión confiable mantenida', 'telemetría activa', 'escalamiento a SOC en espera',
-  'recurso: análisis en curso', 'panorama: parcial',
+  'riesgo: posible reingreso sin verificación extra', 'recurso: análisis en curso', 'panorama: parcial',
 ];
 
 export const phase1GameScreen = {
@@ -348,7 +349,7 @@ export const phase1GameScreen = {
     this.stageEl.innerHTML = `
       <div class="p1-s2">
         <div class="p1-label">ORDEN DE RESPUESTA</div>
-        <p class="p1-s2-hint">Completa los 3 bloques con las medidas correctas y en el orden establecido por el protocolo. Pulsa un bloque para quitar su medida.</p>
+        <p class="p1-s2-hint">Completa los 3 bloques con las medidas correctas y en el orden establecido por el protocolo. Pulsa un bloque para quitar su medida. Piensa en qué corta cada frente del incidente: una cuenta que aún permite entrar, credenciales que siguen sirviendo y un reingreso sin protección adicional.</p>
         <div class="s2-slots"></div>
         <div class="s2-pool"></div>
         <div class="p1-answer-actions"></div>

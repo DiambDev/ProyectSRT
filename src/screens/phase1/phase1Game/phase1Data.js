@@ -4,7 +4,7 @@ export const PHASE1_MISSION =
   'Un atacante ha logrado entrar al sistema aprovechando credenciales comprometidas. Cada segundo de duda cuesta datos. Ejecutaremos el protocolo de respuesta ante la intrusión, sin detenernos.';
 
 export const PHASE1_MISSION_AFTER =
-  'Correcto. El atacante aún conserva acceso parcial al sistema. Para recuperar el control debemos ejecutar en orden los pasos del protocolo. Selecciona cada medida y colócala en el bloque correcto.';
+  'Correcto. El atacante aún conserva acceso parcial al sistema: su entrada sigue siendo posible por la cuenta activa, las credenciales que empleó siguen funcionando y nada impide que vuelva a ingresar. Identifica los pasos del protocolo que corten cada uno de esos frentes antes de continuar.';
 
 export const PHASE1_QUESTION_INTRO =
   'Una empresa detecta que un atacante realiza intentos de autenticación contra 20 cuentas distintas, probando únicamente las contraseñas: Summer2026!, Welcome123!, Company2026!. En cada cuenta realiza pocos intentos y después cambia de usuario.';
